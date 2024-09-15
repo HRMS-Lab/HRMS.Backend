@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34302.85
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HRMS.DAL", "HRMS.DAL\HRMS.DAL.csproj", "{F89D4EAC-7FC1-4EEB-AC92-7667659DE76C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRMS.Presentation", "HRMS.Presentation\HRMS.Presentation.csproj", "{37895961-F7A2-4A70-87AF-57B8E7FAB34B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F89D4EAC-7FC1-4EEB-AC92-7667659DE76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F89D4EAC-7FC1-4EEB-AC92-7667659DE76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F89D4EAC-7FC1-4EEB-AC92-7667659DE76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F89D4EAC-7FC1-4EEB-AC92-7667659DE76C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37895961-F7A2-4A70-87AF-57B8E7FAB34B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37895961-F7A2-4A70-87AF-57B8E7FAB34B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37895961-F7A2-4A70-87AF-57B8E7FAB34B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37895961-F7A2-4A70-87AF-57B8E7FAB34B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5132200C-E773-42F3-9D00-94CEDBC93A4F}
+	EndGlobalSection
+EndGlobal
