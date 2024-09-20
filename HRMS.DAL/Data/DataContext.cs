@@ -130,7 +130,7 @@ namespace HRMS.DAL.Data
             {
                 entity.Property(e => e.AttachmentId).HasColumnName("AttachmentID");
                 entity.Property(e => e.AttachTypeID).HasColumnName("AttachTypeID");
-                entity.Property(e => e.Attachmnts).HasColumnType("image");
+                entity.Property(e => e.Attachments).HasColumnType("image");
                 entity.Property(e => e.DateCreated)
                     .HasDefaultValueSql("(getdate())")
                     .HasColumnType("datetime");

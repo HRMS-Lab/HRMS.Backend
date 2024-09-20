@@ -14,7 +14,7 @@ public partial class Attachment
     [StoredProcedureParameter]
     public int? EmployeeId { get; set; }
     [StoredProcedureParameter]
-    public byte[]? Attachmnts { get; set; }
+    public byte[]? Attachments { get; set; }
     [StoredProcedureParameter]
     public bool? Active { get; set; }
     [StoredProcedureParameter]

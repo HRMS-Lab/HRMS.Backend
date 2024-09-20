@@ -1,4 +1,7 @@
-﻿using System;
+﻿using HRMS.DAL.Handler;
+using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HRMS.DAL.ModelsDto
 {
@@ -6,7 +9,10 @@ namespace HRMS.DAL.ModelsDto
     {
         public int? AttachTypeID { get; set; }
         public int? EmployeeId { get; set; }
-        public byte[]? Attachmnts { get; set; }
+
+        //[JsonConverter(typeof(ByteArrayConverter))]
+        public byte[]? Attachments { get; set; }
+
         public bool? Active { get; set; }
         public string? Refrence1 { get; set; }
         public string? Refrence2 { get; set; }

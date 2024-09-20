@@ -35,8 +35,13 @@ namespace HRMS.Presentation.Controllers
 
 
         [HttpGet("[action]")]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(int pageNumber, int pageSize)
         {
+            //Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>();
+            //whereConditionsDic.Add("PageSize", pageSize);
+            //whereConditionsDic.Add("PageNumber", pageSize);
+            //var data = await employeeRepository.GetListByCustomFields(whereConditionsDic);
+
             var data = await employeeRepository.Get();
             return data;
         }

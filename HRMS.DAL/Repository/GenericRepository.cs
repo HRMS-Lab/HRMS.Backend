@@ -32,6 +32,7 @@ namespace HRMS.DAL
             _tableID = tableID;
             _spPrefix = SpPrefix == "" ? "Master1" : SpPrefix;
         }
+
         protected string BuildSqlQuery(T entity, string choice, int id = 0)
         {
             var parameters = entity
@@ -59,11 +60,8 @@ namespace HRMS.DAL
                         }
                         else if (value is Byte[])
                         {
-                            var bytes = (Byte[])value;
-                            if (bytes.Length > 0)
-                                return bytes.ToString();
-                            else
-                                return "";
+                            var bytes = Convert.ToBase64String((byte[])value);
+                            return $"@{prop.Name}='{bytes}'";
                         }
                         return $"@{prop.Name}={value}";
                     }
@@ -79,10 +77,8 @@ namespace HRMS.DAL
             else
                 query = $"EXEC {_spPrefix}_{choice}{_procedureName} {string.Join(", ", parameters)} ,@{_tableID}={id}";
 
-
-
-            // Print or log the generated query
-            Console.WriteLine("Generated Query: " + query); // You can replace Console.WriteLine with your preferred logging mechanism
+            // You can replace Console.WriteLine with the preferred logging mechanism
+            Console.WriteLine("Generated Query: " + query); 
 
             return query;
         }
@@ -147,7 +143,6 @@ namespace HRMS.DAL
         }
 
         //Create Request
-
         public async Task<ActionResult<T>> Add(T entity)
         {
             var parameterErrorResult = new SqlParameter
@@ -204,30 +199,32 @@ namespace HRMS.DAL
         }
 
 
-        public void AddRange(IEnumerable<T> entities)
-        {
-            _context.Set<T>().AddRange(entities);
-        }
-        public IEnumerable<T> Find(Expression<Func<T, bool>> expression)
-        {
-            return _context.Set<T>().Where(expression);
-        }
-        public IEnumerable<T> GetAll()
-        {
-            return _context.Set<T>().ToList();
-        }
-        public T GetById(int id)
-        {
-            return _context.Set<T>().Find(id);
-        }
-        public void Remove(T entity)
-        {
-            _context.Set<T>().Remove(entity);
-        }
-        public void RemoveRange(IEnumerable<T> entities)
-        {
-            _context.Set<T>().RemoveRange(entities);
-        }
+        #region Not Needed Code
+        //public void AddRange(IEnumerable<T> entities)
+        //{
+        //    _context.Set<T>().AddRange(entities);
+        //}
+        //public IEnumerable<T> Find(Expression<Func<T, bool>> expression)
+        //{
+        //    return _context.Set<T>().Where(expression);
+        //}
+        //public IEnumerable<T> GetAll()
+        //{
+        //    return _context.Set<T>().ToList();
+        //}
+        //public T GetById(int id)
+        //{
+        //    return _context.Set<T>().Find(id);
+        //}
+        //public void Remove(T entity)
+        //{
+        //    _context.Set<T>().Remove(entity);
+        //}
+        //public void RemoveRange(IEnumerable<T> entities)
+        //{
+        //    _context.Set<T>().RemoveRange(entities);
+        //} 
+        #endregion
 
         public Task<IActionResult> Delete(int id)
         {
