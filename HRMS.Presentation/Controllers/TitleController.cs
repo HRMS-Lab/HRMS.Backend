@@ -19,6 +19,7 @@ namespace HRMS.Presentation.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [ApiExceptionHandler]
+    [Authorize]
     public class TitleController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

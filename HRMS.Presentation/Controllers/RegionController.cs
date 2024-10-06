@@ -6,6 +6,7 @@ using HRMS.DAL.ModelsDto;
 using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
 using HRMS.Presentation.Handlers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +15,7 @@ namespace HRMS.Presentation.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [ApiExceptionHandler]
+    [Authorize]
     public class RegionController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

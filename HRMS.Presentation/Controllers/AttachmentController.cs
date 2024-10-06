@@ -9,12 +9,15 @@ using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
 using HRMS.DAL;
 using HRMS.Presentation.Handlers;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRMS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [ApiExceptionHandler]
+    [Authorize]
     public class AttachmentController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -29,7 +32,7 @@ namespace HRMS.Presentation.Controllers
         [HttpGet("[action]/{id}/{orgid}")]
         public async Task<ActionResult<Attachment>> GetAttachment(int id, int orgid)
         {
-            var data = await attachmentRepository.GetByTableIdAndCustomField(id, orgid,"orgid");
+            var data = await attachmentRepository.GetByTableIdAndCustomField(id, orgid, "orgid");
             return data;
         }
 
@@ -37,7 +40,7 @@ namespace HRMS.Presentation.Controllers
         [HttpGet("[action]/{OrgId}")]
         public async Task<ActionResult<IEnumerable<Attachment>>> GetAttachments(int OrgId)
         {
-            var data = await attachmentRepository.GetListByCustomField(OrgId,"orgid");
+            var data = await attachmentRepository.GetListByCustomField(OrgId, "orgid");
             return data;
         }
 
@@ -67,6 +70,16 @@ namespace HRMS.Presentation.Controllers
             }
             else
                 return BadRequest();
+
+        }
+
+        [HttpPut("[action]/{id}/{orgid}")]
+        public async Task<ActionResult<string>> GetAttachmentFile(int id, int orgid)
+        {
+            var data = await attachmentRepository.GetByTableIdAndCustomField(id, orgid, "orgid");
+            ObjectResult objectResult = (ObjectResult)data.Result;
+            byte[] image = ((Attachment)objectResult.Value).Attachments;
+            return File(image, "image/jpg");
 
         }
     }

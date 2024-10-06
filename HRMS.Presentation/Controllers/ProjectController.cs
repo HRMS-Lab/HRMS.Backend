@@ -8,12 +8,14 @@ using HRMS.Presentation.Handlers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using HRMS.DAL.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRMS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [ApiExceptionHandler]
+    [Authorize]
     public class ProjectController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

@@ -19,7 +19,7 @@ namespace HRMS.DAL.Data
         {
         }
 
-        public virtual DbSet<Address> Addresses { get; set; }
+        public virtual DbSet<Addresses> Addresses { get; set; }
 
         public virtual DbSet<AttachType> AttachTypes { get; set; }
 
@@ -65,12 +65,12 @@ namespace HRMS.DAL.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Address>(entity =>
+            modelBuilder.Entity<Addresses>(entity =>
             {
                 entity.HasKey(e => e.AddressId).HasName("PK__Addresse__091C2A1BC8E86FEE");
 
                 entity.Property(e => e.AddressId).HasColumnName("AddressID");
-                entity.Property(e => e.Address1)
+                entity.Property(e => e.Address)
                     .HasMaxLength(100)
                     .HasColumnName("Address");
                 entity.Property(e => e.City).HasMaxLength(50);
@@ -137,6 +137,7 @@ namespace HRMS.DAL.Data
                 entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");
                 entity.Property(e => e.Refrence1).HasMaxLength(50);
+                entity.Property(e => e.FileFormat).HasMaxLength(50);
                 entity.Property(e => e.Refrence2).HasMaxLength(50);
                 entity.Property(e => e.Refrence3).HasMaxLength(50);
                 entity.Property(e => e.Refrence4).HasMaxLength(50);

@@ -9,12 +9,14 @@ using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
 using HRMS.DAL;
 using HRMS.Presentation.Handlers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRMS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [ApiExceptionHandler]
+    [Authorize]
     public class EmployeeController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -27,24 +29,39 @@ namespace HRMS.Presentation.Controllers
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<ActionResult<Employee>> GetEmployee(int id)
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployee(int id)
         {
-            var data = await employeeRepository.GetByTableId(id);
+            Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>();
+            whereConditionsDic.Add("EmployeeID", id);
+            whereConditionsDic.Add("PageSize", 10);
+            whereConditionsDic.Add("PageNumber", 1);
+            var data = await employeeRepository.GetListByCustomFieldsfilterd(whereConditionsDic, string.Empty, "GetEmployeesPagination");
+            //var data = await employeeRepository.GetByTableId(id);
             return data;
         }
 
-
-        [HttpGet("[action]")]
+        [HttpGet("[action]/{pageNumber}/{pageSize}")]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(int pageNumber, int pageSize)
         {
-            //Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>();
-            //whereConditionsDic.Add("PageSize", pageSize);
-            //whereConditionsDic.Add("PageNumber", pageSize);
-            //var data = await employeeRepository.GetListByCustomFields(whereConditionsDic);
-
-            var data = await employeeRepository.Get();
+            Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>();
+            whereConditionsDic.Add("PageSize", pageSize);
+            whereConditionsDic.Add("PageNumber", pageNumber);
+            var data = await employeeRepository.GetListByCustomFieldsfilterd(whereConditionsDic, string.Empty, "GetEmployeesPagination");
             return data;
         }
+
+
+
+        [HttpGet("[action]/{pageNumber}/{pageSize}/filter/{SearchValue}")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(int pageNumber, int pageSize, string SearchValue)
+        {
+            Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>();
+            whereConditionsDic.Add("PageSize", pageSize);
+            whereConditionsDic.Add("PageNumber", pageNumber);
+            var data = await employeeRepository.GetListByCustomFieldsfilterd(whereConditionsDic, SearchValue, "GetEmployeesPagination");
+            return data;
+        }
+
 
         [HttpPost("[action]")]
         public async Task<ActionResult<Employee>> CreateEmployee(EmployeeDto Employee)
@@ -53,7 +70,7 @@ namespace HRMS.Presentation.Controllers
             {
                 MappingHandler mapping = new MappingHandler();
                 Employee _Employee = mapping.Map<Employee>(Employee);
-                return await employeeRepository.Add(_Employee);
+                return await employeeRepository.AddAndRetrive(_Employee);
             }
             else
                 return BadRequest();

@@ -1,18 +1,20 @@
 ﻿using HRMS.DAL.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace HRMS.DAL;
 
-public partial class Address
+public partial class Addresses
 {
     public int AddressId { get; set; }
 
     [StoredProcedureParameter]
     public int EmployeeId { get; set; }
+
     [StoredProcedureParameter]
-    public string? Address1 { get; set; }
+    public string? Address { get; set; }
     [StoredProcedureParameter]
     public int? RegionId { get; set; }
 

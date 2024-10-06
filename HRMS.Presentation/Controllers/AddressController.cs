@@ -6,6 +6,7 @@ using HRMS.DAL.ModelsDto;
 using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
 using HRMS.Presentation.Handlers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +15,11 @@ namespace HRMS.Presentation.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [ApiExceptionHandler]
+    [Authorize]
     public class AddressController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        IGenericRepository<Address> addressRepository;
+        IGenericRepository<Addresses> addressRepository;
 
         public AddressController(IUnitOfWork unitOfWork)
         {
@@ -26,7 +28,7 @@ namespace HRMS.Presentation.Controllers
         }
 
         [HttpGet("[action]/{employeeID}/{orgID}")]
-        public async Task<ActionResult<IEnumerable<Address>>> GetAddress(int employeeID, int orgID)
+        public async Task<ActionResult<IEnumerable<Addresses>>> GetAddress(int employeeID, int orgID)
         {
             Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>
             {
@@ -39,12 +41,12 @@ namespace HRMS.Presentation.Controllers
 
 
         [HttpPost("[action]")]
-        public async Task<ActionResult<Address>> CreateAddress(AddressDto Address)
+        public async Task<ActionResult<Addresses>> CreateAddress(AddressDto Address)
         {
             if (TryValidateModel(Address))
             {
                 MappingHandler mapping = new MappingHandler();
-                Address _Address = mapping.Map<Address>(Address);
+                Addresses _Address = mapping.Map<Addresses>(Address);
                 return await addressRepository.Add(_Address);
             }
             else
@@ -59,7 +61,7 @@ namespace HRMS.Presentation.Controllers
             if (TryValidateModel(Address))
             {
                 MappingHandler mapping = new MappingHandler();
-                Address _Address = mapping.Map<Address>(Address);
+                Addresses _Address = mapping.Map<Addresses>(Address);
                 return await addressRepository.Update(id, _Address);
             }
             else

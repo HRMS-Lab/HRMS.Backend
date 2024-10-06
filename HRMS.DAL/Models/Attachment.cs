@@ -16,6 +16,8 @@ public partial class Attachment
     [StoredProcedureParameter]
     public byte[]? Attachments { get; set; }
     [StoredProcedureParameter]
+    public string? FileFormat { get; set; }
+    [StoredProcedureParameter]
     public bool? Active { get; set; }
     [StoredProcedureParameter]
     public string? Refrence1 { get; set; }

@@ -35,7 +35,7 @@ public partial class Region
     public DateTime? LastUpdated { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+    public virtual ICollection<Addresses> Addresses { get; set; } = new List<Addresses>();
     [JsonIgnore]
     public virtual ICollection<District> Districts { get; set; } = new List<District>();
     [JsonIgnore]

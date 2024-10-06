@@ -78,7 +78,7 @@ namespace HRMS.DAL
                 query = $"EXEC {_spPrefix}_{choice}{_procedureName} {string.Join(", ", parameters)} ,@{_tableID}={id}";
 
             // You can replace Console.WriteLine with the preferred logging mechanism
-            Console.WriteLine("Generated Query: " + query); 
+            Console.WriteLine("Generated Query: " + query);
 
             return query;
         }
@@ -89,9 +89,16 @@ namespace HRMS.DAL
             return Ok(data);
         }
 
-        public async Task<ActionResult<IEnumerable<T>>> GetListByCustomField(int CustomFieldId, string CustomFieldName)
+        public async Task<ActionResult<IEnumerable<T>>> Search(string spName, string searchValue)
         {
-            var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s @{CustomFieldName}={CustomFieldId}").ToListAsync();
+            var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_{spName} @SearchValue={searchValue}").ToListAsync();
+
+            return Ok(data);
+        }
+
+        public async Task<ActionResult<IEnumerable<T>>> GetListByCustomField(int CustomFieldName, string CustomFieldValue)
+        {
+            var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s @{CustomFieldValue}={CustomFieldName}").ToListAsync();
 
             return Ok(data);
         }
@@ -106,8 +113,9 @@ namespace HRMS.DAL
         public async Task<ActionResult<T>> GetByTableIdAndCustomField(int tableIdValue, int customFieldValue, string customFieldName)
         {
             var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s @{_tableID}={tableIdValue}, @{customFieldName}={customFieldValue}").ToListAsync();
+
             Console.WriteLine("Generated Query: " + data);
-            return Ok(data);
+            return Ok(data.FirstOrDefault());
         }
 
         public async Task<ActionResult<IEnumerable<T>>> GetListByCustomFields(Dictionary<string, int> whereConditions)
@@ -123,6 +131,27 @@ namespace HRMS.DAL
                 if (i + 1 < whereConditions.Count)
                     query += ", ";
             }
+            var data = await this._context.Set<T>().FromSqlRaw(query).ToListAsync();
+            return Ok(data);
+        }
+
+        public async Task<ActionResult<IEnumerable<T>>> GetListByCustomFieldsfilterd(Dictionary<string, int> whereConditions, string SearchValue, string spName)
+        {
+            string query = $"EXEC {_spPrefix}_{spName} ";
+            int whereConditionsCounter = whereConditions.Count();
+            for (int i = 0; i < whereConditions.Count(); i++)
+            {
+                var condition = whereConditions.ToList()[i];
+                if (condition.Value == 0)
+                    continue;
+                query += $"@{condition.Key}={condition.Value}";
+                if (i + 1 < whereConditions.Count)
+                    query += ", ";
+            }
+
+            if (!string.IsNullOrEmpty(SearchValue))
+                query += $", @SearchValue=N'{SearchValue}'";
+
             var data = await this._context.Set<T>().FromSqlRaw(query).ToListAsync();
             return Ok(data);
         }
@@ -156,6 +185,26 @@ namespace HRMS.DAL
             await _unitOfWork.Save();
             //string error = (string)parameterErrorResult.Value;
             return entity;
+        }
+
+        public async Task<ActionResult<T>> AddAndRetrive(T entity)
+        {
+            var parameterErrorResult = new SqlParameter
+            {
+                ParameterName = "@ErrorResult",
+                SqlDbType = System.Data.SqlDbType.NVarChar,
+                Direction = System.Data.ParameterDirection.Output,
+            };
+            var sqlQuery = BuildSqlQuery(entity, "Insert");
+            //this._context.Database.ExecuteSqlRaw(sqlQuery);
+            
+
+            var data = await this._context.Set<T>().FromSqlRaw(sqlQuery).ToListAsync();
+            await _unitOfWork.Save();
+
+            return Ok(data);
+            //string error = (string)parameterErrorResult.Value;
+            //return entity;
         }
 
         //Update Request

@@ -9,12 +9,14 @@ using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
 using HRMS.DAL;
 using HRMS.Presentation.Handlers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRMS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [ApiExceptionHandler]
+    [Authorize]
     public class AttachTypeController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

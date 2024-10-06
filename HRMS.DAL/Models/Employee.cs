@@ -61,7 +61,7 @@ public partial class Employee
     public DateTime? LastUpdated { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+    public virtual ICollection<Addresses> Addresses { get; set; } = new List<Addresses>();
     [JsonIgnore]
     public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
     [JsonIgnore]

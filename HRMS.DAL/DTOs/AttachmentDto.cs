@@ -19,6 +19,7 @@ namespace HRMS.DAL.ModelsDto
         public string? Refrence3 { get; set; }
         public string? Refrence4 { get; set; }
         public string? Refrence5 { get; set; }
+        public string? FileFormat { get; set; }
         public DateTime? DateCreated { get; set; }
         public DateTime? LastUpdated { get; set; }
     }

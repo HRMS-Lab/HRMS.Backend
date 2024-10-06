@@ -9,7 +9,7 @@ using HRMS.DAL.UnitOfWork;
 
 namespace HRMS.DAL.TypeRepository
 {
-    public class AddressRepository : GenericRepository<Address>
+    public class AddressRepository : GenericRepository<Addresses>
     {
         public AddressRepository(IUnitOfWork unitOfWork, string ProcedureName, string TableID, string Prefix) : base(unitOfWork, ProcedureName, TableID, Prefix)
         {
