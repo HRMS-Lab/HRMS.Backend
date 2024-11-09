@@ -40,8 +40,7 @@ public partial class Organization
 
 	[JsonIgnore]
 	public virtual ICollection<AttachType> AttachTypes { get; set; } = new List<AttachType>();
-	[JsonIgnore]
-	public virtual ICollection<AttendanceRecord> AttendanceRecords { get; set; } = new List<AttendanceRecord>();
+
 	[JsonIgnore]
 	public virtual ICollection<OrganizationChart> OrganizationCharts { get; set; } = new List<OrganizationChart>();
 	[JsonIgnore]

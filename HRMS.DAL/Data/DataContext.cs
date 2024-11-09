@@ -152,18 +152,18 @@ namespace HRMS.DAL.Data
 				entity.HasKey(e => e.AttendanceId).HasName("PK__Attendan__8B69263C136B87FF");
 
 				entity.Property(e => e.AttendanceId).HasColumnName("AttendanceID");
+				entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
+				entity.Property(e => e.AttendanceTypeId).IsRequired(false).HasColumnName("AttendenceTypeID");
 				entity.Property(e => e.AttendanceDate).HasColumnType("date");
-				entity.Property(e => e.AttendanceStatusId).HasColumnName("AttendanceStatusID");
-				entity.Property(e => e.AttendanceTypeId).HasColumnName("AttendanceTypeID");
+				entity.Property(e => e.AttendanceDay).IsRequired(false);
+				entity.Property(e => e.AttendanceMonth).IsRequired(false);
+				entity.Property(e => e.AttendanceYear).IsRequired(false);
 				entity.Property(e => e.CheckInTime).HasColumnType("datetime");
 				entity.Property(e => e.CheckOutTime).HasColumnType("datetime");
-				entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
-				entity.Property(e => e.OrgId).HasColumnName("OrgID");
-
-				entity.HasOne(d => d.AttendanceStatus).WithMany(p => p.AttendanceRecords)
-					.HasForeignKey(d => d.AttendanceStatusId)
-					.OnDelete(DeleteBehavior.ClientSetNull)
-					.HasConstraintName("FK__Attendanc__Atten__2B0A656D");
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
 				entity.HasOne(d => d.AttendanceType).WithMany(p => p.AttendanceRecords)
 					.HasForeignKey(d => d.AttendanceTypeId)
@@ -175,10 +175,25 @@ namespace HRMS.DAL.Data
 					.OnDelete(DeleteBehavior.ClientSetNull)
 					.HasConstraintName("FK__Attendanc__Emplo__5BE2A6F2");
 
+				/*
+				entity.Property(e => e.AttendanceStatusId).IsRequired(false).HasColumnName("AttendanceStatusID");
+				
+
+				entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
+				entity.Property(e => e.OrgId).HasColumnName("OrgID");
+
+				
+				entity.HasOne(d => d.AttendanceStatus).WithMany(p => p.AttendanceRecords)
+					.HasForeignKey(d => d.AttendanceStatusId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK__Attendanc__Atten__2B0A656D");
+				
 				entity.HasOne(d => d.Org).WithMany(p => p.AttendanceRecords)
 					.HasForeignKey(d => d.OrgId)
 					.OnDelete(DeleteBehavior.ClientSetNull)
 					.HasConstraintName("FK__Attendanc__OrgID__5CD6CB2B");
+
+				*/
 			});
 
 			modelBuilder.Entity<AttendanceStatus>(entity =>
