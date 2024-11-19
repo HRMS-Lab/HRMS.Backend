@@ -22,7 +22,7 @@ namespace HRMS.Presentation.Controllers
 		public DistrictController(IUnitOfWork unitOfWork)
 		{
 			this._unitOfWork = unitOfWork;
-			districtRepository = new DistrictRepository(_unitOfWork, "District", "DistrictId", "MSORG");
+			districtRepository = new DistrictRepository(_unitOfWork, "District", "DistrictID", "MSORG");
 		}
 
 		[HttpGet("[action]/{regionid}/{orgid}")]
