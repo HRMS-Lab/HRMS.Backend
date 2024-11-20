@@ -1,10 +1,12 @@
 ﻿
 using HRMS.DAL.Data;
+using HRMS.DAL.Helpers;
 using HRMS.DAL.Interfaces;
 using HRMS.DAL.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace HRMS.DAL
 {
@@ -75,10 +77,70 @@ namespace HRMS.DAL
 			return query;
 		}
 
+		protected string BuildSqlQueryWithFilters(Dictionary<string, int> whereConditions, string SearchValue = "", string spName = "")
+		{
+			string query;
+			if (!string.IsNullOrEmpty(spName))
+				query = $"EXEC {_spPrefix}_{spName} ";
+			else
+				query = $"EXEC {_spPrefix}_Get{_procedureName}s ";
+
+			int whereConditionsCounter = whereConditions.Count();
+			for (int i = 0; i < whereConditions.Count(); i++)
+			{
+				var condition = whereConditions.ToList()[i];
+				if (condition.Value == 0)
+					continue;
+				query += $"@{condition.Key}={condition.Value}";
+				if (i + 1 < whereConditions.Count)
+					query += ", ";
+			}
+
+			if (!string.IsNullOrEmpty(SearchValue))
+				query += $", @SearchValue=N'{SearchValue}'";
+
+			return query;
+		}
+
 		public async Task<ActionResult<IEnumerable<T>>> Get()
 		{
 			var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s").ToListAsync();
 			return Ok(data);
+		}
+
+		public async Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string spName)
+		{
+			return await GetPaginated(pageIndex, pageSize, "", spName);
+		}
+
+		public async Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string SearchValue, string spName)
+		{
+			var queryCount = new SqlParameter("@TotalCount", SqlDbType.Int) { Direction = ParameterDirection.Output };
+
+			string query = BuildSqlQueryWithFilters(new Dictionary<string, int>
+			{
+				{ "PageSize", pageSize },
+				{ "PageNumber", pageIndex }
+			}, SearchValue, spName);
+
+			query += ", @TotalCount={0} OUT";
+
+			var paginatedData = await _context.Set<T>().FromSqlRaw(query, queryCount).ToListAsync();
+
+			var totalCount = _context.Set<T>().Count();
+			var filterCount = (int)queryCount.Value;
+
+			var pagedList = new PagedList<T>
+			{
+				PageIndex = pageIndex,
+				PageSize = pageSize,
+				TotalCount = totalCount,
+				FilterCount = filterCount,
+				Items = paginatedData,
+				TotalPages = (int)Math.Ceiling(filterCount / (double)pageSize)
+			};
+
+			return Ok(pagedList);
 		}
 
 		public async Task<ActionResult<IEnumerable<T>>> Search(string spName, string searchValue)

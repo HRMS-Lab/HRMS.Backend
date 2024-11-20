@@ -1,4 +1,5 @@
 ﻿
+using HRMS.DAL.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRMS.DAL.Interfaces
@@ -6,6 +7,8 @@ namespace HRMS.DAL.Interfaces
 	public interface IGenericRepository<T> where T : class
 	{
 		public Task<ActionResult<IEnumerable<T>>> Get();
+		public Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string spName);
+		public Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string searchValue, string spName);
 		public Task<ActionResult<IEnumerable<T>>> Search(string spName, string searchValue);
 		public Task<ActionResult<T>> GetByTableId(int id);
 		public Task<ActionResult<T>> GetByTableIdAndCustomField(int id, int CustomFieldValue, string CustomFieldName);
