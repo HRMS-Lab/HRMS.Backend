@@ -1,31 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using HRMS.DAL.Data;
 
 namespace HRMS.DAL;
 
 public partial class AttendanceRecord
 {
-    public int AttendanceId { get; set; }
+	public int AttendanceId { get; set; }
 
-    public int EmployeeId { get; set; }
+	[StoredProcedureParameter]
+	public int EmployeeId { get; set; }
 
-    public int OrgId { get; set; }
+	[StoredProcedureParameter]
+	public DateTime AttendanceDate { get; set; }
 
-    public DateTime AttendanceDate { get; set; }
+	[StoredProcedureParameter]
+	public int? AttendanceDay { get; set; }
 
-    public DateTime? CheckInTime { get; set; }
+	[StoredProcedureParameter]
+	public int? AttendanceMonth { get; set; }
 
-    public DateTime? CheckOutTime { get; set; }
+	[StoredProcedureParameter]
+	public int? AttendanceYear { get; set; }
 
-    public int AttendanceStatusId { get; set; }
+	[StoredProcedureParameter]
+	public DateTime? CheckInTime { get; set; }
 
-    public int AttendanceTypeId { get; set; }
+	[StoredProcedureParameter]
+	public DateTime? CheckOutTime { get; set; }
 
-    public virtual AttendanceStatus AttendanceStatus { get; set; }
+	[StoredProcedureParameter]
+	public bool? EntryType { get; set; }
 
-    public virtual AttendanceType AttendanceType { get; set; }
+	[StoredProcedureParameter]
+	public DateTime? DateCreated { get; set; }
 
-    public virtual Employee Employee { get; set; }
+	[StoredProcedureParameter]
+	public DateTime? LastUpdated { get; set; }
 
-    public virtual Organization Org { get; set; }
+	[StoredProcedureParameter]
+	public int? AttendanceTypeId { get; set; }
+
+	public virtual AttendanceType AttendanceType { get; set; }
+
+	public virtual Employee Employee { get; set; }
 }

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.7.34302.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HRMS.DAL", "HRMS.DAL\HRMS.DAL.csproj", "{F89D4EAC-7FC1-4EEB-AC92-7667659DE76C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRMS.Presentation", "HRMS.Presentation\HRMS.Presentation.csproj", "{37895961-F7A2-4A70-87AF-57B8E7FAB34B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HRMS.Presentation", "HRMS.Presentation\HRMS.Presentation.csproj", "{37895961-F7A2-4A70-87AF-57B8E7FAB34B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
