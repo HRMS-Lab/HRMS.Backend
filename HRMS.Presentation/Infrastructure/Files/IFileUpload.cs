@@ -4,6 +4,7 @@
 	{
 		public Task<string> UploadFileAsync(IFormFile file, string innerDir = "");
 		public Task DeleteFileAsync(string filePath);
+		public string GetFilePhysicalPath(string fileUrl);
 		public string GetOriginalFileName(string filePath);
 	}
 }

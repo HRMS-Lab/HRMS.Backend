@@ -37,7 +37,7 @@ public partial class AttendanceRecord
 	public DateTime? LastUpdated { get; set; }
 
 	[StoredProcedureParameter]
-	public int? AttendanceTypeId { get; set; }
+	public int? AttendenceTypeId { get; set; }
 
 	public virtual AttendanceType AttendanceType { get; set; }
 

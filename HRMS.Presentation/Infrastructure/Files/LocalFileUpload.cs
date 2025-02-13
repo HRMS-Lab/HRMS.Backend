@@ -3,40 +3,75 @@
 	public class LocalFileUpload : IFileUpload
 	{
 		private readonly IWebHostEnvironment _webHostEnv;
-
-		public LocalFileUpload(IWebHostEnvironment webHostEnv)
+		private readonly string _baseUrl;
+		public LocalFileUpload(IWebHostEnvironment webHostEnv, IConfiguration configuration)
 		{
 			_webHostEnv = webHostEnv;
+			_baseUrl = "http://41.196.0.83/HRMS_Abdo";
 		}
 
 		public async Task<string> UploadFileAsync(IFormFile file, string innerDir = "")
 		{
-			if (file.Length > 0)
+			if (file.Length <= 0)
 			{
-				string uploadFolder = Path.Combine(_webHostEnv.WebRootPath, "Uploads", innerDir);
-				Directory.CreateDirectory(uploadFolder);
+				throw new Exception("No file is provided.");
+			}
 
-				string uniqueFileName = Guid.NewGuid().ToString() + "-" + file.FileName;
-				string file_path = Path.Combine(uploadFolder, uniqueFileName);
+			string uploadFolder = Path.Combine(_webHostEnv.WebRootPath, "Uploads", innerDir);
+			Directory.CreateDirectory(uploadFolder);
 
-				using (var fileStream = new FileStream(file_path, FileMode.Create))
+			string uniqueFileName = Guid.NewGuid().ToString() + "-" + file.FileName;
+			string filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+			try
+			{
+				using (var fileStream = new FileStream(filePath, FileMode.Create))
 				{
 					await file.CopyToAsync(fileStream);
 				}
 
-				return file_path;
+				string fileUrl = $"{_baseUrl}/Uploads/{innerDir}/{uniqueFileName}";
+				return fileUrl;
 			}
-			else
+			catch (Exception ex)
 			{
-				throw new Exception("No file is provided.");
+				throw new Exception("An error occurred while uploading the file.", ex);
 			}
 		}
 
-		public async Task DeleteFileAsync(string filePath)
+		public async Task DeleteFileAsync(string fileUrl)
 		{
-			if (File.Exists(filePath))
+			string fullFilePath = GetFilePhysicalPath(fileUrl);
+
+			if (File.Exists(fullFilePath))
 			{
-				await Task.Run(() => File.Delete(filePath));
+				try
+				{
+					await Task.Yield();
+					File.Delete(fullFilePath);
+				}
+				catch (Exception ex)
+				{
+					throw new Exception($"An error occurred while deleting the file: {fullFilePath}", ex);
+				}
+			}
+			else
+			{
+				throw new FileNotFoundException($"File not found: {fullFilePath}");
+			}
+		}
+
+		public string GetFilePhysicalPath(string fileUrl)
+		{
+			if (Uri.TryCreate(fileUrl, UriKind.Absolute, out Uri? fileUri))
+			{
+				string filePath = fileUri.AbsolutePath;
+				string relativePath = filePath.Substring(filePath.IndexOf("/Uploads/", StringComparison.Ordinal));
+				return Path.Combine(_webHostEnv.WebRootPath, relativePath.TrimStart('/'));
+			}
+			else
+			{
+				throw new ArgumentException("Invalid file URL format.", nameof(fileUrl));
 			}
 		}
 

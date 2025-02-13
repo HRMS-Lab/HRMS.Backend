@@ -1,228 +1,52 @@
-﻿
-using HRMS.DAL.Data;
-using HRMS.DAL.Helpers;
+﻿using HRMS.DAL.Extensions;
 using HRMS.DAL.Interfaces;
+using HRMS.DAL.Repository;
+using HRMS.DAL.UDTs.Helpers;
 using HRMS.DAL.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Reflection;
 
 namespace HRMS.DAL
 {
-	public class GenericRepository<T> : ControllerBase, IGenericRepository<T> where T : class
+	public class GenericRepository<T> : ReadOnlyRepository<T>, IGenericRepository<T> where T : class
 	{
 		protected readonly DbContext _context;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly string _procedureName;
 		private readonly string _tableID;
 		private readonly string _spPrefix;
+		private readonly string _connectionString;
 
-		public GenericRepository(IUnitOfWork unitOfWork, string crudProcedureName = "CRUD", string tableID = "", string SpPrefix = "")
+		public GenericRepository(IUnitOfWork unitOfWork, string crudProcedureName = "CRUD", string tableID = "", string SpPrefix = "") : base(unitOfWork, crudProcedureName, tableID, SpPrefix)
 		{
 			_unitOfWork = unitOfWork;
 			_context = unitOfWork.Context;
 			_procedureName = crudProcedureName;
 			_tableID = tableID;
 			_spPrefix = SpPrefix == "" ? "Master1" : SpPrefix;
+
+			_connectionString = _context.Database.GetDbConnection().ConnectionString;
 		}
 
-		protected string BuildSqlQuery(T entity, string choice, int id = 0)
+		public async Task<ActionResult<T>> ExecuteProcedure(string spName, Dictionary<string, Object?>? parameters = null, bool save = false)
 		{
-			var parameters = entity
-				.GetType()
-				.GetProperties()
-				.Where(prop => Attribute.IsDefined(prop, typeof(StoredProcedureParameterAttribute)))
-				.Select(prop =>
-				{
-					var value = prop.GetValue(entity);
+			var query = $"EXEC {_spPrefix}_{spName} ";
 
-					if (value is null)
-					{
-						return "";
-					}
-					else
-					{
-						if (value is string)
-						{
-							return $"@{prop.Name}='{value}'";
-						}
-						else if (value is DateTime)
-						{
-							var formattedDate = ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss");
-							return $"@{prop.Name}='{formattedDate}'";
-						}
-						else if (value is Byte[])
-						{
-							var bytes = Convert.ToBase64String((byte[])value);
-							return $"@{prop.Name}='{bytes}'";
-						}
-						return $"@{prop.Name}={value}";
-					}
-
-				}).Where(s => !string.IsNullOrWhiteSpace(s)).ToList().ToList();
-
-			string query = "";
-
-
-
-			if (id == 0)
-				query = $"EXEC {_spPrefix}_{choice}{_procedureName} {string.Join(", ", parameters)}";
-			else
-				query = $"EXEC {_spPrefix}_{choice}{_procedureName} {string.Join(", ", parameters)} ,@{_tableID}={id}";
-
-			// You can replace Console.WriteLine with the preferred logging mechanism
-			Console.WriteLine("Generated Query: " + query);
-
-			return query;
-		}
-
-		protected string BuildSqlQueryWithFilters(Dictionary<string, int> whereConditions, string SearchValue = "", string spName = "")
-		{
-			string query;
-			if (!string.IsNullOrEmpty(spName))
-				query = $"EXEC {_spPrefix}_{spName} ";
-			else
-				query = $"EXEC {_spPrefix}_Get{_procedureName}s ";
-
-			int whereConditionsCounter = whereConditions.Count();
-			for (int i = 0; i < whereConditions.Count(); i++)
+			if (parameters != null)
 			{
-				var condition = whereConditions.ToList()[i];
-				if (condition.Value == 0)
-					continue;
-				query += $"@{condition.Key}={condition.Value}";
-				if (i + 1 < whereConditions.Count)
-					query += ", ";
+				var filteredParameters = parameters.Where(x => x.Value != null).ToList();
+				query += string.Join(", ", filteredParameters.Select(x => ParseParameter(x.Value, x.Key)));
 			}
 
-			if (!string.IsNullOrEmpty(SearchValue))
-				query += $", @SearchValue=N'{SearchValue}'";
+			int data = await this._context.Database.ExecuteSqlRawAsync(query);
 
-			return query;
-		}
+			if (save)
+				await _unitOfWork.Save();
 
-		public async Task<ActionResult<IEnumerable<T>>> Get()
-		{
-			var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s").ToListAsync();
-			return Ok(data);
-		}
-
-		public async Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string spName)
-		{
-			return await GetPaginated(pageIndex, pageSize, "", spName);
-		}
-
-		public async Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string SearchValue, string spName)
-		{
-			var queryCount = new SqlParameter("@TotalCount", SqlDbType.Int) { Direction = ParameterDirection.Output };
-
-			string query = BuildSqlQueryWithFilters(new Dictionary<string, int>
-			{
-				{ "PageSize", pageSize },
-				{ "PageNumber", pageIndex }
-			}, SearchValue, spName);
-
-			query += ", @TotalCount={0} OUT";
-
-			var paginatedData = await _context.Set<T>().FromSqlRaw(query, queryCount).ToListAsync();
-
-			var totalCount = _context.Set<T>().Count();
-			var filterCount = (int)queryCount.Value;
-
-			var pagedList = new PagedList<T>
-			{
-				PageIndex = pageIndex,
-				PageSize = pageSize,
-				TotalCount = totalCount,
-				FilterCount = filterCount,
-				Items = paginatedData,
-				TotalPages = (int)Math.Ceiling(filterCount / (double)pageSize)
-			};
-
-			return Ok(pagedList);
-		}
-
-		public async Task<ActionResult<IEnumerable<T>>> Search(string spName, string searchValue)
-		{
-			var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_{spName} @SearchValue={searchValue}").ToListAsync();
-
-			return Ok(data);
-		}
-
-		public async Task<ActionResult<IEnumerable<T>>> GetListByCustomField(int CustomFieldName, string CustomFieldValue)
-		{
-			var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s @{CustomFieldValue}={CustomFieldName}").ToListAsync();
-
-			return Ok(data);
-		}
-
-		public async Task<ActionResult<T>> GetByTableId(int id)
-		{
-			var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s @{_tableID}={id}").ToListAsync();
-			Console.WriteLine("Generated Query: " + data);
-			return Ok(data);
-		}
-
-		public async Task<ActionResult<T>> GetByTableIdAndCustomField(int tableIdValue, int customFieldValue, string customFieldName)
-		{
-			var data = await this._context.Set<T>().FromSqlRaw($"EXEC {_spPrefix}_Get{_procedureName}s @{_tableID}={tableIdValue}, @{customFieldName}={customFieldValue}").ToListAsync();
-
-			Console.WriteLine("Generated Query: " + data);
-			return Ok(data.FirstOrDefault());
-		}
-
-		public async Task<ActionResult<IEnumerable<T>>> GetListByCustomFields(Dictionary<string, int> whereConditions)
-		{
-			string query = $"EXEC {_spPrefix}_Get{_procedureName}s ";
-			int whereConditionsCounter = whereConditions.Count();
-			for (int i = 0; i < whereConditions.Count(); i++)
-			{
-				var condition = whereConditions.ToList()[i];
-				if (condition.Value == 0)
-					continue;
-				query += $"@{condition.Key}={condition.Value}";
-				if (i + 1 < whereConditions.Count)
-					query += ", ";
-			}
-			var data = await this._context.Set<T>().FromSqlRaw(query).ToListAsync();
-			return Ok(data);
-		}
-
-		public async Task<ActionResult<IEnumerable<T>>> GetListByCustomFieldsfilterd(Dictionary<string, int> whereConditions, string SearchValue, string spName)
-		{
-			string query = $"EXEC {_spPrefix}_{spName} ";
-			int whereConditionsCounter = whereConditions.Count();
-			for (int i = 0; i < whereConditions.Count(); i++)
-			{
-				var condition = whereConditions.ToList()[i];
-				if (condition.Value == 0)
-					continue;
-				query += $"@{condition.Key}={condition.Value}";
-				if (i + 1 < whereConditions.Count)
-					query += ", ";
-			}
-
-			if (!string.IsNullOrEmpty(SearchValue))
-				query += $", @SearchValue=N'{SearchValue}'";
-
-			var data = await this._context.Set<T>().FromSqlRaw(query).ToListAsync();
-			return Ok(data);
-		}
-
-		public async Task<ActionResult<T>> GetByCustomFields(Dictionary<string, int> whereConditions)
-		{
-			string query = $"EXEC {_spPrefix}_Get{_procedureName}s ";
-			int whereConditionsCounter = whereConditions.Count();
-			for (int i = 0; i < whereConditions.Count(); i++)
-			{
-				var condition = whereConditions.ToList()[i];
-				query += $"@{condition.Key}={condition.Value}";
-				if (i + 1 < whereConditions.Count)
-					query += ", ";
-			}
-			var data = await this._context.Set<T>().FromSqlRaw(query).ToListAsync();
-			return Ok(data);
+			return Ok($"{data} row(s) affected.");
 		}
 
 		//Create Request
@@ -261,31 +85,72 @@ namespace HRMS.DAL
 			//return entity;
 		}
 
+		public async Task<ActionResult<T>> Add(T entity, Dictionary<string, IEnumerable<object>> udts)
+		{
+			var parameterErrorResult = new SqlParameter
+			{
+				ParameterName = "@ErrorResult",
+				SqlDbType = System.Data.SqlDbType.NVarChar,
+				Direction = System.Data.ParameterDirection.Output,
+			};
+
+			var sqlQuery = BuildSqlQuery(entity, "Insert");
+			int cnt = 0;
+
+			var tvpParams = udts.Select(udt =>
+			{
+				var udtValue = udt.Value;
+				if (udtValue == null || !udtValue.Any())
+					return null;
+
+				var tableAttribute = udtValue.FirstOrDefault()?.GetType().GetCustomAttribute<UserDefinedTableAttribute>() ?? null;
+				if (tableAttribute == null)
+					throw new InvalidOperationException("Entity does not have a UserDefinedTableAttribute.");
+
+				var udtName = tableAttribute.TableName;
+
+				sqlQuery += $", @{udt.Key}={{{cnt++}}}";
+
+				return new SqlParameter
+				{
+					ParameterName = $"@{udt.Key}",
+					SqlDbType = System.Data.SqlDbType.Structured,
+					Value = udtValue.ToDataTable(),
+					TypeName = $"dbo.{udtName}"
+				};
+			}).Where(x => x != null).ToArray();
+
+			this._context.Database.ExecuteSqlRaw(sqlQuery, tvpParams);
+			await _unitOfWork.Save();
+			//string error = (string)parameterErrorResult.Value;
+			return Ok(entity);
+		}
+
 		//Update Request
 		/*public async Task<IActionResult> Update(int id, T entity)
-        {
-            var entityType = typeof(T);
-            var primaryKeyProperty = entityType.GetProperty($"{_tableID}");
-            if (primaryKeyProperty == null)
-            {
-                return BadRequest("Entity does not have a primary key property named 'Id'.");
-            }
-            var sqlQuery = BuildSqlQuery(entity, "Update", id);
-            Console.WriteLine(sqlQuery + "Update:");
-            // Execute the SQL query
-            this._context.Database.ExecuteSqlRaw(sqlQuery);
+		{
+			var entityType = typeof(T);
+			var primaryKeyProperty = entityType.GetProperty($"{_tableID}");
+			if (primaryKeyProperty == null)
+			{
+				return BadRequest("Entity does not have a primary key property named 'Id'.");
+			}
+			var sqlQuery = BuildSqlQuery(entity, "Update", id);
+			Console.WriteLine(sqlQuery + "Update:");
+			// Execute the SQL query
+			this._context.Database.ExecuteSqlRaw(sqlQuery);
 
-            try
-            {
-                await _unitOfWork.Save();
-                return Ok(entity);
+			try
+			{
+				await _unitOfWork.Save();
+				return Ok(entity);
 
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
-        }*/
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				throw;
+			}
+		}*/
 
 		public async Task<IActionResult> Update(int id, T entity)
 		{
@@ -327,7 +192,7 @@ namespace HRMS.DAL
 		}
 
 		//Delete Request
-		public async Task<IActionResult> Remove(int id)
+		/*public async Task<IActionResult> Remove(int id)
 		{
 			var data = await this._context.Set<T>().FindAsync(id);
 			if (data == null)
@@ -338,6 +203,31 @@ namespace HRMS.DAL
 			//dbSet.Remove(data);
 			await _unitOfWork.Save();
 			return NoContent();
+		}*/
+
+		public async Task<IActionResult> Remove(int id)
+		{
+			return await Remove(new Dictionary<string, int> { { _tableID, id } });
+		}
+
+		public async Task<ActionResult> Remove(Dictionary<string, int>? whereConditions = null)
+		{
+			var query = $"EXEC {_spPrefix}_Delete{_procedureName} ";
+
+			if (whereConditions != null)
+			{
+				foreach (var condition in whereConditions)
+				{
+					query += $"@{condition.Key}={condition.Value}";
+					if (whereConditions.Last().Key != condition.Key)
+						query += ", ";
+				}
+			}
+
+			await this._context.Database.ExecuteSqlRawAsync(query);
+			await _unitOfWork.Save();
+
+			return Ok();
 		}
 
 

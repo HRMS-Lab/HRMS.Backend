@@ -11,7 +11,7 @@ public partial class District
 	[StoredProcedureParameter]
 	public string DistrictName { get; set; }
 	[StoredProcedureParameter]
-	public string? DistrictDesciption { get; set; }
+	public string? DistrictDescription { get; set; }
 	[StoredProcedureParameter]
 	public string? Lat { get; set; }
 	[StoredProcedureParameter]
