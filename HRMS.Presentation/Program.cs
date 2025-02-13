@@ -1,6 +1,7 @@
 
 using HRMS.DAL.Data;
 using HRMS.DAL.UnitOfWork;
+using HRMS.Presentation.Authorization;
 using HRMS.Presentation.Infrastructure.Files;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,7 @@ builder.Services.AddAuthentication(options =>
 	};
 });
 
-
+builder.Services.AddSingleton<JwtDecoder>(new JwtDecoder(builder.Configuration["Jwt:Key"]));
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<IFileUpload, LocalFileUpload>();
 

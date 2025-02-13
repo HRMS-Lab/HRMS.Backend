@@ -60,4 +60,19 @@ public partial class Organization
 
 	[JsonIgnore]
 	public virtual ICollection<AttendanceType> AttendanceTypes { get; set; } = new List<AttendanceType>();
+
+	[JsonIgnore]
+	public virtual ICollection<PayrollDeduction> PayrollDeductions { get; set; } = new List<PayrollDeduction>();
+
+	[JsonIgnore]
+	public virtual ICollection<PayrollEarning> PayrollEarnings { get; set; } = new List<PayrollEarning>();
+
+	[JsonIgnore]
+	public virtual ICollection<PayrollTemplateHeader> PayrollTemplateHeaders { get; set; } = new List<PayrollTemplateHeader>();
+
+	[JsonIgnore]
+	public virtual ICollection<DisclaimerType> DisclaimerTypes { get; set; } = new List<DisclaimerType>();
+
+	[JsonIgnore]
+	public virtual ICollection<Disclaimer> Disclaimers { get; set; } = new List<Disclaimer>();
 }

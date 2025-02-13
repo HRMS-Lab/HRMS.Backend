@@ -2,11 +2,10 @@
 using HRMS.DAL.Data;
 using HRMS.DAL.DTOs;
 using HRMS.DAL.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -35,6 +34,8 @@ namespace HRMS.Presentation.Controllers
 
                 if (user != null)
                 {
+                    var allowedPagesIds = await GetAllowedPagesFor(user.UserID);
+
                     //create claims details based on the user information
                     ClaimsIdentity ci = new ClaimsIdentity();
                     var claims = new[] {
@@ -43,11 +44,11 @@ namespace HRMS.Presentation.Controllers
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim("Id", user.UserID.ToString()),
                         new Claim("Username", user.UserName),
+                        new Claim("FullName", user.FullName ?? ""),
                         new Claim("OrganizationID", user.OrganizationID.ToString()),
-                        new Claim("OrganizationName", user.OrganizationName.ToString())
+                        new Claim("OrganizationName", user.OrganizationName.ToString()),
+                        new Claim("AllowedPages", JsonConvert.SerializeObject(allowedPagesIds)),
                     };
-
-
 
                     var ExpirationDatatime = DateTime.Now.AddYears(4);
                     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -96,11 +97,24 @@ namespace HRMS.Presentation.Controllers
                     OrganizationID = organization.OrgId,
                     OrganizationName = organization.OrgName,
                     UserID = user.UserID,
-                    UserName = user.UserName
+                    UserName = user.UserName,
+                    FullName = user.FullName
                 };
 
                 return loginObject;
             }
+        }
+
+        private async Task<IEnumerable<int>> GetAllowedPagesFor(int userId)
+        {
+            var UIs = await dataContext.UserInterfaces
+                .Include(ui => ui.Roles)
+                .ThenInclude(r => r.SecurityGroups)
+                .Where(ui => ui.Roles.Any(r => r.SecurityGroups.Any(sg => sg.Users.Any(u => u.UserID == userId) && sg.Active == true)) && ui.Active)
+                .Select(ui => ui.UIActualId)
+                .ToListAsync();
+
+            return UIs;
         }
     }
 }

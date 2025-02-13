@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using HRMS.DAL;
 using HRMS.DAL.Handler;
-using HRMS.DAL.ModelsDto;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using HRMS.DAL.Interfaces;
+using HRMS.DAL.ModelsDto;
 using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
-using HRMS.DAL;
 using HRMS.Presentation.Handlers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HRMS.Presentation.Controllers
 {
@@ -35,7 +32,7 @@ namespace HRMS.Presentation.Controllers
             return data;
         }
 
-        
+
         [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<Organization>>> GetOrganizations()
         {

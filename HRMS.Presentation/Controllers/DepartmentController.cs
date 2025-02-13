@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using HRMS.DAL;
 using HRMS.DAL.Handler;
-using HRMS.DAL.ModelsDto;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using HRMS.DAL.Interfaces;
+using HRMS.DAL.ModelsDto;
 using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
-using HRMS.DAL;
 using HRMS.Presentation.Handlers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HRMS.Presentation.Controllers
 {
@@ -51,6 +48,18 @@ namespace HRMS.Presentation.Controllers
                 MappingHandler mapping = new MappingHandler();
                 Department _department = mapping.Map<Department>(department);
                 return await departmentRepository.Add(_department);
+                //return await departmentRepository.AddParam(_department, "InsertDepartment");
+                /*
+				var nameParam = new SqlParameter("DepartmentName", SqlDbType.NVarChar) { Value = _department.DepartmentName };
+				var discriptionParam = new SqlParameter("DepartmentDescription", SqlDbType.NVarChar) { Value = _department.DepartmentDescription };
+				var OrgIdParam = new SqlParameter("OrgID", SqlDbType.Int) { Value = _department.OrgId };
+				var activeParam = new SqlParameter("Active", SqlDbType.Int) { Value = _department.Active == true ? 1 : 0 };
+
+				var data = await departmentRepository.ExecuteInsertStoredProcedure("InsertDepartment",
+					nameParam, discriptionParam, OrgIdParam, activeParam);
+
+				return data;
+				*/
             }
             else
                 return BadRequest();

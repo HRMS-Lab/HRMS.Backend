@@ -16,9 +16,13 @@ namespace HRMS.DAL.Data
 
 		public virtual DbSet<Addresses> Addresses { get; set; }
 
+		public virtual DbSet<AdminProjectMapping> AdminProjectMappings { get; set; }
+
 		public virtual DbSet<AttachType> AttachTypes { get; set; }
 
 		public virtual DbSet<Attachment> Attachments { get; set; }
+
+		public virtual DbSet<AttendanceCalender> AttendanceCalenders { get; set; }
 
 		public virtual DbSet<AttendanceRecord> AttendanceRecords { get; set; }
 
@@ -34,6 +38,10 @@ namespace HRMS.DAL.Data
 
 		public virtual DbSet<District> Districts { get; set; }
 
+		public virtual DbSet<DisclaimerType> DisclaimerTypes { get; set; }
+
+		public virtual DbSet<Disclaimer> Disclaimers { get; set; }
+
 		public virtual DbSet<Employee> Employees { get; set; }
 
 		public virtual DbSet<EmployeesProject> EmployeesProjects { get; set; }
@@ -41,6 +49,14 @@ namespace HRMS.DAL.Data
 		public virtual DbSet<Organization> Organizations { get; set; }
 
 		public virtual DbSet<Project> Projects { get; set; }
+
+		public virtual DbSet<PayrollDeduction> PayrollDeductions { get; set; }
+
+		public virtual DbSet<PayrollEarning> PayrollEarnings { get; set; }
+
+		public virtual DbSet<PayrollTemplateHeader> PayrollTemplateHeaders { get; set; }
+
+		public virtual DbSet<PayrollTemplateLine> PayrollTemplateLines { get; set; }
 
 		public virtual DbSet<ProjectRegion> ProjectRegions { get; set; }
 
@@ -52,11 +68,15 @@ namespace HRMS.DAL.Data
 
 		public virtual DbSet<User> Users { get; set; }
 
-		public virtual DbSet<UserFunction> UserFunctions { get; set; }
-
 		public virtual DbSet<OrganizationChart> OrganizationChart { get; set; }
 
-		public virtual DbSet<UserSecurityGroup> UserSecurityGroups { get; set; }
+		public virtual DbSet<Role> Roles { get; set; }
+
+		public virtual DbSet<SecurityRole> SecurityRoles { get; set; }
+
+		public virtual DbSet<UserInterface> UserInterfaces { get; set; }
+
+		public virtual DbSet<RoleUserInterfaces> RoleUserInterfaces { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -92,6 +112,29 @@ namespace HRMS.DAL.Data
 					.HasForeignKey(d => d.RegionId)
 					.OnDelete(DeleteBehavior.ClientSetNull)
 					.HasConstraintName("FK_Addresses_Regions");
+			});
+
+			modelBuilder.Entity<AdminProjectMapping>(entity =>
+			{
+				entity.ToTable("AdminProjectsAssign");
+
+				entity.HasKey(e => e.Id).HasName("PK__AdminPro__3214EC07A3A3D3A4");
+
+				entity.Property(e => e.Id).HasColumnName("Admin_ProjID");
+				entity.Property(e => e.AdminId).HasColumnName("AdminID");
+				entity.Property(e => e.ProjectId).HasColumnName("ProjectID");
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())").HasColumnType("datetime");
+
+				entity.HasOne(d => d.Admin).WithMany(p => p.AdminProjectMappings)
+					.HasForeignKey(d => d.AdminId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK__AdminProj__Admin__4D94879B");
+
+				entity.HasOne(d => d.Project).WithMany(p => p.AdminProjectMappings)
+					.HasForeignKey(d => d.ProjectId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK__AdminProj__Proj__4E88ABD4");
 			});
 
 			modelBuilder.Entity<AttachType>(entity =>
@@ -147,13 +190,26 @@ namespace HRMS.DAL.Data
 					.HasConstraintName("FK_Attachments_Employees");
 			});
 
+			modelBuilder.Entity<AttendanceCalender>(entity =>
+			{
+				entity.HasKey(e => e.AttenCalenderId).HasName("PK_AttendanceCalenders");
+				entity.ToTable("AttendanceCalenders");
+
+				entity.Property(e => e.AttenCalenderId).HasColumnName("AttendanceCalenderID");
+				entity.Property(e => e.DateCalender).HasColumnType("datetime").HasColumnName("DateCalender");
+				entity.Property(e => e.Day).HasColumnName("DateCalenderDay");
+				entity.Property(e => e.Month).HasColumnName("DateCalenderMonth");
+				entity.Property(e => e.Year).HasColumnName("DateCalenderYear");
+				entity.Property(e => e.Lock).IsRequired().HasColumnName("Lock");
+			});
+
 			modelBuilder.Entity<AttendanceRecord>(entity =>
 			{
 				entity.HasKey(e => e.AttendanceId).HasName("PK__Attendan__8B69263C136B87FF");
 
 				entity.Property(e => e.AttendanceId).HasColumnName("AttendanceID");
 				entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
-				entity.Property(e => e.AttendanceTypeId).IsRequired(false).HasColumnName("AttendenceTypeID");
+				entity.Property(e => e.AttendenceTypeId).IsRequired(false).HasColumnName("AttendenceTypeID");
 				entity.Property(e => e.AttendanceDate).HasColumnType("date");
 				entity.Property(e => e.AttendanceDay).IsRequired(false);
 				entity.Property(e => e.AttendanceMonth).IsRequired(false);
@@ -166,7 +222,7 @@ namespace HRMS.DAL.Data
 				entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
 				entity.HasOne(d => d.AttendanceType).WithMany(p => p.AttendanceRecords)
-					.HasForeignKey(d => d.AttendanceTypeId)
+					.HasForeignKey(d => d.AttendenceTypeId)
 					.OnDelete(DeleteBehavior.ClientSetNull)
 					.HasConstraintName("FK__Attendanc__Atten__2BFE89A6");
 
@@ -319,7 +375,7 @@ namespace HRMS.DAL.Data
 					.HasDefaultValueSql("(getdate())")
 					.HasColumnType("datetime");
 				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
-				entity.Property(e => e.DistrictDesciption).HasMaxLength(50);
+				entity.Property(e => e.DistrictDescription).HasMaxLength(50);
 				entity.Property(e => e.DistrictName)
 					.IsRequired()
 					.HasMaxLength(50);
@@ -336,6 +392,65 @@ namespace HRMS.DAL.Data
 					.HasForeignKey(d => d.RegionId)
 					.OnDelete(DeleteBehavior.ClientSetNull)
 					.HasConstraintName("FK_Districts_Regions");
+			});
+
+			modelBuilder.Entity<DisclaimerType>(entity =>
+			{
+				entity.HasKey(e => e.DisclaimerTypeId).HasName("PK__Disclaim__D3A3E3A3A3A3E3A3");
+				entity.ToTable("DisclaimerTypes");
+
+				entity.Property(e => e.DisclaimerTypeId).HasColumnName("DisclaimerTypeID");
+				entity.Property(e => e.OrgId).HasColumnName("OrgID");
+				entity.Property(e => e.DisclaimerDescription).HasMaxLength(100);
+				entity.Property(e => e.DisclaimerTypeName)
+					.IsRequired()
+					.HasMaxLength(50);
+				entity.Property(e => e.Active).IsRequired();
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
+				entity.HasOne(d => d.Organization).WithMany(p => p.DisclaimerTypes)
+					.HasForeignKey(d => d.OrgId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_DisclaimerTypes_Organization");
+			});
+
+			modelBuilder.Entity<Disclaimer>(entity =>
+			{
+				entity.HasKey(e => e.DisclaimerId).HasName("PK__Disclaim__D3A3E3A3A3A3E3A3");
+				entity.ToTable("Disclaimers");
+
+				entity.Property(e => e.DisclaimerId).HasColumnName("DisclaimerID");
+				entity.Property(e => e.DisclaimerTypeId).HasColumnName("DisclaimerTypeID");
+				entity.Property(e => e.EmployeeId).IsRequired(false).HasColumnName("EmployeeID");
+				entity.Property(e => e.OrgId).HasColumnName("OrgID");
+				entity.Property(e => e.DisclaimerDate).HasColumnType("datetime");
+				entity.Property(e => e.DisclaimerDateFrom).HasColumnType("datetime");
+				entity.Property(e => e.ReasonOfDisclaimer).IsRequired(false).HasMaxLength(100);
+				entity.Property(e => e.Status).IsRequired(false);
+				entity.Property(e => e.WFId).IsRequired(false);
+				entity.Property(e => e.Active).IsRequired();
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).IsRequired(false).HasColumnType("datetime");
+
+				entity.HasOne(d => d.DisclaimerType).WithMany(p => p.Disclaimers)
+					.HasForeignKey(d => d.DisclaimerTypeId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_Disclaimers_DisclaimerTypes");
+
+				entity.HasOne(d => d.Employee).WithMany(p => p.Disclaimers)
+					.HasForeignKey(d => d.EmployeeId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_Disclaimers_Employees");
+
+				entity.HasOne(d => d.Organization).WithMany(p => p.Disclaimers)
+					.HasForeignKey(d => d.OrgId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_Disclaimers_Org");
 			});
 
 			modelBuilder.Entity<Employee>(entity =>
@@ -361,6 +476,7 @@ namespace HRMS.DAL.Data
 				entity.Property(e => e.DateCreated)
 					.HasDefaultValueSql("(getdate())")
 					.HasColumnType("datetime");
+				entity.Property(e => e.Gender).HasColumnName("Gender");
 				entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
 				entity.Property(e => e.Email).HasMaxLength(50);
 				entity.Property(e => e.EmployeeCode).HasMaxLength(50);
@@ -543,23 +659,40 @@ namespace HRMS.DAL.Data
 
 			modelBuilder.Entity<SecurityGroup>(entity =>
 			{
-				entity.HasKey(e => e.SecurityGroupId).HasName("PK__Security__A23B00415359D249");
+				entity.HasKey(e => e.SecurityGroupId).HasName("PK__SecurityGroup__A23B00415359D249");
 
 				entity.Property(e => e.SecurityGroupId).HasColumnName("SecurityGroupID");
-				entity.Property(e => e.FunctionId).HasColumnName("FunctionID");
 				entity.Property(e => e.OrgId).HasColumnName("OrgID");
 				entity.Property(e => e.SecurityGroupName)
 					.IsRequired()
 					.HasMaxLength(100)
 					.IsUnicode(false);
-
-				entity.HasOne(d => d.Function).WithMany(p => p.SecurityGroups)
-					.HasForeignKey(d => d.FunctionId)
-					.HasConstraintName("FK_SecurityGroups_Functions");
+				entity.Property(e => e.Active).IsRequired(false);
+				entity.Property(e => e.CreatedDate)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.LastUpdated).HasColumnType("datetime");
 
 				entity.HasOne(d => d.Org).WithMany(p => p.SecurityGroups)
 					.HasForeignKey(d => d.OrgId)
 					.HasConstraintName("FK_SecurityGroups_Organization");
+
+				entity.HasMany(s => s.Roles).WithMany(r => r.SecurityGroups)
+					.UsingEntity<SecurityRole>(
+						j => j.HasOne<Role>().WithMany()
+							  .HasForeignKey(sr => sr.RoleId)
+							  .OnDelete(DeleteBehavior.ClientSetNull)
+							  .HasConstraintName("FK__SecRoles__Roles__5060F446"),
+						j => j.HasOne<SecurityGroup>().WithMany()
+							  .HasForeignKey(sr => sr.SecGroupId)
+							  .OnDelete(DeleteBehavior.ClientSetNull)
+							  .HasConstraintName("FK__SecRoles__SecGroups__1970F446"),
+						j =>
+						{
+							j.ToTable("SecurityRoles");
+							j.HasKey(sr => new { sr.RoleId, sr.SecGroupId });
+						});
+
 			});
 
 			modelBuilder.Entity<Title>(entity =>
@@ -610,42 +743,24 @@ namespace HRMS.DAL.Data
 				entity.Property(e => e.UserName)
 					.IsRequired()
 					.HasMaxLength(50);
+				entity.Property(e => e.FullName)
+					.IsRequired(false)
+					.HasMaxLength(50);
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.IsSuperviser).IsRequired(false);
+				entity.Property(e => e.Active).IsRequired();
+				entity.Property(e => e.SecurityGroupId).HasColumnName("SecurityGroupID");
 
 				entity.HasOne(d => d.Org).WithMany(p => p.Users)
 					.HasForeignKey(d => d.OrgID)
 					.HasConstraintName("FK_Users_Organization");
 
-				entity.HasMany(d => d.SecurityGroups).WithMany(p => p.Users)
-					.UsingEntity<Dictionary<string, object>>(
-						"UserSecurityGroup",
-						r => r.HasOne<SecurityGroup>().WithMany()
-							.HasForeignKey("SecurityGroupId")
-							.OnDelete(DeleteBehavior.ClientSetNull)
-							.HasConstraintName("FK__UserSecur__Secur__5070F446"),
-						l => l.HasOne<User>().WithMany()
-							.HasForeignKey("UserId")
-							.OnDelete(DeleteBehavior.ClientSetNull)
-							.HasConstraintName("FK__UserSecur__UserI__06CD04F7"),
-						j =>
-						{
-							j.HasKey("UserId", "SecurityGroupId").HasName("PK__UserSecu__1DAB7CA8E81926D3");
-							j.ToTable("UserSecurityGroups");
-							j.IndexerProperty<int>("UserId").HasColumnName("UserID");
-							j.IndexerProperty<int>("SecurityGroupId").HasColumnName("SecurityGroupID");
-						});
-			});
-
-			modelBuilder.Entity<UserFunction>(entity =>
-			{
-				entity.HasKey(e => e.FuncId).HasName("PK_Functions");
-
-				entity.Property(e => e.FuncId).HasColumnName("FuncID");
-				entity.Property(e => e.FunctionName).HasMaxLength(50);
-				entity.Property(e => e.Refrence1).HasMaxLength(50);
-				entity.Property(e => e.Refrence2).HasMaxLength(50);
-				entity.Property(e => e.Refrence3).HasMaxLength(50);
-				entity.Property(e => e.Refrence4).HasMaxLength(50);
-				entity.Property(e => e.Refrence5).HasMaxLength(50);
+				entity.HasOne(d => d.SecurityGroup).WithMany(p => p.Users)
+					.HasForeignKey(d => d.SecurityGroupId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_UserSecurityGroup_Users");
 			});
 
 			modelBuilder.Entity<EmployeesProject>(entity =>
@@ -677,12 +792,198 @@ namespace HRMS.DAL.Data
 					.HasConstraintName("FK_EmployeesProjects_Projects");
 			});
 
-			modelBuilder.Entity<UserSecurityGroup>(entity =>
+			modelBuilder.Entity<PayrollDeduction>(entity =>
 			{
-				entity.HasNoKey();
-				entity.ToTable("UserSecurityGroup");
-				entity.Property(e => e.SecurityGroupID).HasColumnName("SecurityGroupID");
-				entity.Property(e => e.UserID).HasColumnName("UserID");
+				entity.HasKey(e => e.PayDeductId).HasName("PK__PayrollDeductions");
+				entity.ToTable("PayrollDeductions");
+
+				entity.Property(e => e.PayDeductId).HasColumnName("PayDeductID");
+				entity.Property(e => e.OrgId).HasColumnName("OrgID");
+				entity.Property(e => e.DeductionName).HasColumnName("DeductionName")
+					.IsRequired()
+					.HasMaxLength(50);
+				entity.Property(e => e.DeductionDesc).HasColumnName("DeductionDesc")
+					.HasMaxLength(100);
+				entity.Property(e => e.Refrence).HasColumnName("Refrence")
+					.HasMaxLength(50);
+				entity.Property(e => e.Active).HasColumnName("Active")
+					.IsRequired();
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
+
+				entity.HasOne(d => d.Org).WithMany(p => p.PayrollDeductions)
+					.HasForeignKey(d => d.OrgId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_PayDeducts_Org");
+
+			});
+
+			modelBuilder.Entity<PayrollEarning>(entity =>
+			{
+				entity.HasKey(e => e.PayEarningId).HasName("PK__PayrollEarnings");
+				entity.ToTable("PayrollEarnings");
+
+				entity.Property(e => e.PayEarningId).HasColumnName("PayEarningID");
+				entity.Property(e => e.OrgId).HasColumnName("OrgID");
+				entity.Property(e => e.EarningName).HasColumnName("EarningName")
+					.IsRequired()
+					.HasMaxLength(50);
+				entity.Property(e => e.EarningDesc).HasColumnName("EarningDesc")
+					.HasMaxLength(100);
+				entity.Property(e => e.Refrence).HasColumnName("Refrence")
+					.HasMaxLength(50);
+				entity.Property(e => e.Active).HasColumnName("Active")
+					.IsRequired();
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
+
+				entity.HasOne(d => d.Org).WithMany(p => p.PayrollEarnings)
+					.HasForeignKey(d => d.OrgId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_PayEarnings_Org");
+
+			});
+
+			modelBuilder.Entity<PayrollTemplateHeader>(entity =>
+			{
+				entity.HasKey(e => e.PayTempHeadId).HasName("PK_PayrollTemplateHeaders");
+				entity.ToTable("PayrollTemplateHeaders");
+
+				entity.Property(e => e.PayTempHeadId).HasColumnName("PayTempHeadID");
+				entity.Property(e => e.OrgId).HasColumnName("OrgID");
+				entity.Property(e => e.TemplateName).HasColumnName("TemplateName")
+					.IsRequired()
+					.HasMaxLength(50);
+				entity.Property(e => e.TemplateDesc).HasColumnName("TemplateDesc")
+					.HasMaxLength(100);
+				entity.Property(e => e.Refrence).HasColumnName("Refrence")
+					.HasMaxLength(50);
+				entity.Property(e => e.Active).HasColumnName("Active")
+					.IsRequired();
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
+
+				entity.HasOne(d => d.Org).WithMany(p => p.PayrollTemplateHeaders)
+					.HasForeignKey(d => d.OrgId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_PayTempHead_Org");
+
+			});
+
+			modelBuilder.Entity<PayrollTemplateLine>(entity =>
+			{
+				entity.HasKey(e => e.PayTempLinesId).HasName("PK_PayrollTemplateLines");
+				entity.ToTable("PayrollTemplateLines");
+
+				entity.Property(e => e.PayTempLinesId).HasColumnName("PayTempLinesID");
+				entity.Property(e => e.PayTempHeaderId).HasColumnName("PayTempHeaderID");
+				entity.Property(e => e.PayDeductId).HasColumnName("PayDeductID");
+				entity.Property(e => e.PayEarningId).HasColumnName("PayEarningID");
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
+
+				entity.HasOne(d => d.PayrollEarning).WithMany(p => p.PayrollTemplateLines)
+					.HasForeignKey(d => d.PayEarningId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_PayTempLine_PayEarning");
+
+				entity.HasOne(d => d.PayrollDeduction).WithMany(p => p.PayrollTemplateLines)
+					.HasForeignKey(d => d.PayDeductId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_PayTempLine_PayDeduct");
+
+				entity.HasOne(d => d.PayrollTemplateHeader).WithMany(p => p.PayrollTemplateLines)
+					.HasForeignKey(d => d.PayTempHeaderId)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_PayTempLine_PayTempHead");
+			});
+
+			modelBuilder.Entity<Role>(entity =>
+			{
+				entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1A3A3E3A3A");
+
+				entity.Property(e => e.RoleId).HasColumnName("RoleID");
+				entity.Property(e => e.RoleName).HasMaxLength(50).IsRequired();
+				entity.Property(e => e.RoleDescription).HasMaxLength(100);
+				entity.Property(e => e.Active).IsRequired();
+
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
+			});
+
+			modelBuilder.Entity<SecurityRole>(entity =>
+			{
+				entity.ToTable("SecurityRoles");
+				entity.HasKey(e => e.SecRoleId).HasName("PK__SecurityRoles__8AFACE1A3A3E3G5A");
+
+				entity.Property(e => e.SecRoleId).HasColumnName("SecRoleID");
+				entity.Property(e => e.RoleId).HasColumnName("RoleID");
+				entity.Property(e => e.SecGroupId).HasColumnName("SecGroupID");
+
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
+			});
+
+			modelBuilder.Entity<UserInterface>(entity =>
+			{
+				entity.ToTable("UserInterfaces");
+				entity.HasKey(e => e.UIId).HasName("PK__UserInterfaces__8AFACE1A3A3E3A3A");
+
+				entity.Property(e => e.UIId).HasColumnName("UIID");
+				entity.Property(e => e.UIActualId).HasColumnName("UIActualID").IsRequired();
+				entity.Property(e => e.UIName).HasMaxLength(50).IsRequired();
+				entity.Property(e => e.URL).HasMaxLength(100);
+				entity.Property(e => e.Active).IsRequired();
+
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
+
+				entity.HasMany(s => s.Roles).WithMany(r => r.UserInterfaces)
+					.UsingEntity<RoleUserInterfaces>(
+						j => j.HasOne<Role>().WithMany()
+							.HasForeignKey(sr => sr.RoleId)
+							.OnDelete(DeleteBehavior.ClientSetNull)
+							.HasConstraintName("FK__RolesUI__Roles__5060F446"),
+						j => j.HasOne<UserInterface>().WithMany()
+							.HasForeignKey(sr => sr.UIId)
+							.OnDelete(DeleteBehavior.ClientSetNull)
+							.HasConstraintName("FK__RolesUI__UI__1970F446"),
+						j =>
+						{
+							j.ToTable("RoleUserInterfaces");
+							j.HasKey(sr => new { sr.RoleId, sr.UIId });
+						});
+
+			});
+
+			modelBuilder.Entity<RoleUserInterfaces>(entity =>
+			{
+				entity.ToTable("RolesUserInterfaces");
+				entity.HasKey(e => e.UIRoleId).HasName("PK__RoleUserInterfaces__8AFACE1A3A3E3G5A");
+
+				entity.Property(e => e.UIRoleId).HasColumnName("UIRoleID");
+				entity.Property(e => e.RoleId).HasColumnName("RoleID");
+				entity.Property(e => e.UIId).HasColumnName("UIID");
+				entity.Property(e => e.Active);
+
+				entity.Property(e => e.DateCreated)
+					.HasDefaultValueSql("(getdate())")
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
 			});
 
 			OnModelCreatingPartial(modelBuilder);

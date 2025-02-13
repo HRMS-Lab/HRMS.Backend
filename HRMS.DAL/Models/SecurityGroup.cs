@@ -1,28 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HRMS.DAL.Data;
+using System.Text.Json.Serialization;
 
 namespace HRMS.DAL.Models
 {
 
-    public class SecurityGroup
-    {
-        public int SecurityGroupId { get; set; }
+	public class SecurityGroup
+	{
+		public int SecurityGroupId { get; set; }
+		[StoredProcedureParameter]
+		public int OrgId { get; set; }
+		[StoredProcedureParameter]
+		public string SecurityGroupName { get; set; }
+		[StoredProcedureParameter]
+		public bool? Active { get; set; }
 
-        public int OrgId { get; set; }
+		public DateTime CreatedDate { get; set; }
+		public DateTime? LastUpdated { get; set; }
 
-        public string SecurityGroupName { get; set; }
+		[JsonIgnore]
+		public virtual Organization Org { get; set; }
+		[JsonIgnore]
+		public virtual ICollection<User> Users { get; set; } = new List<User>();
+		[JsonIgnore]
+		public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 
-        public int? FunctionId { get; set; }
-
-        public virtual UserFunction Function { get; set; }
-
-        public virtual Organization Org { get; set; }
-
-        public virtual ICollection<User> Users { get; set; } = new List<User>();
-
-    }
+	}
 
 }

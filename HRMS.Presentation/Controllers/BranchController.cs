@@ -2,12 +2,12 @@
 using HRMS.DAL.DTOs;
 using HRMS.DAL.Handler;
 using HRMS.DAL.Interfaces;
-using HRMS.DAL.ModelsDto;
+using HRMS.DAL.Repository;
 using HRMS.DAL.TypeRepository;
 using HRMS.DAL.UnitOfWork;
+using HRMS.DAL.Views;
 using HRMS.Presentation.Handlers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRMS.Presentation.Controllers
@@ -20,37 +20,28 @@ namespace HRMS.Presentation.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         IGenericRepository<Branch> branchRepository;
+        IReadOnlyRepository<BranchView> branchViewRepository;
 
         public BranchController(IUnitOfWork unitOfWork)
         {
             this._unitOfWork = unitOfWork;
-            branchRepository = new BranchRepository(_unitOfWork, "Branch", "EmployeeID", "MSORG");
+            branchRepository = new BranchRepository(_unitOfWork, "Branch", "BranchID", "MSORG");
+            branchViewRepository = new ReadOnlyRepository<BranchView>(_unitOfWork, "Branch", "BranchID", "MSORG");
         }
 
-        
+
 
         [HttpGet("[action]/{orgid}/{BranchID}")]
-        public async Task<ActionResult<Branch>> GetBranch(int orgid, int BranchID)
+        public async Task<ActionResult<BranchView>> GetBranch(int orgid, int BranchID)
         {
-
-            Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>
-            {
-                { "orgid", orgid },
-                {"BranchID", BranchID }
-            };
-            var data = await branchRepository.GetByCustomFields(whereConditionsDic);
+            var data = await branchViewRepository.GetByTableIdAndCustomField(BranchID, orgid, "OrgID");
             return data;
         }
 
         [HttpGet("[action]/{orgid}")]
-        public async Task<ActionResult<IEnumerable<Branch>>> GetBranchs(int orgid)
+        public async Task<ActionResult<IEnumerable<BranchView>>> GetBranchs(int orgid)
         {
-
-            Dictionary<string, int> whereConditionsDic = new Dictionary<string, int>
-            {
-                { "orgid", orgid }
-            };
-            var data = await branchRepository.GetListByCustomFields(whereConditionsDic);
+            var data = await branchViewRepository.GetListByCustomField(orgid, "OrgID");
             return data;
         }
 

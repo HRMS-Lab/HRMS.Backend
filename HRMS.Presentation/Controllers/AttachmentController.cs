@@ -39,9 +39,24 @@ namespace HRMS.Presentation.Controllers
 
 
 		[HttpGet("[action]/{OrgId}")]
-		public async Task<ActionResult<IEnumerable<Attachment>>> GetAttachments(int OrgId)
+		public async Task<ActionResult<IEnumerable<Attachment>>> GetAttachments(int OrgId, int attachTypeId)
 		{
-			var data = await attachmentRepository.GetListByCustomField(OrgId, "orgid");
+			var data = await attachmentRepository.GetListByCustomFields(new Dictionary<string, int>
+			{
+				{ "orgid", OrgId },
+				{ "AttachTypeID", attachTypeId}
+			});
+			return data;
+		}
+
+		[HttpGet("[action]/{employeeId}")]
+		public async Task<ActionResult<IEnumerable<Attachment>>> GetAttachmentsByEmployee(int employeeId)
+		{
+			var data = await attachmentRepository.GetListByCustomFieldsfilterd(new Dictionary<string, int>
+			{
+				{ "EmployeeID", employeeId }
+			}, "", "GetEmployeeAttachments");
+
 			return data;
 		}
 
@@ -103,49 +118,45 @@ namespace HRMS.Presentation.Controllers
 				if (employee == null)
 					return BadRequest();
 
-				var oldAttachmentResult = await attachmentRepository.GetByTableIdAndCustomField(id, employee.OrgId, "orgid");
+				var oldAttachment = await attachmentRepository.LinqGetByTableId(id);
 
-				if (oldAttachmentResult.Result is OkObjectResult oldAttachmentObjectResult)
+				if (oldAttachment == null)
+					return BadRequest();
+
+				if (attachment.Attachment != null)
 				{
-					var oldAttachment = (Attachment)oldAttachmentObjectResult.Value;
-					if (oldAttachment == null)
-						return BadRequest();
-
-					if (attachment.Attachment != null)
-					{
-						var path = await _fileUpload.UploadFileAsync(attachment.Attachment, employee.EmployeeCode ?? "");
-						_attachment.AttachmentPath = path;
-						_attachment.FileFormat = attachment.Attachment.ContentType;
-					}
-					else
-					{
-						_attachment.AttachmentPath = oldAttachment.AttachmentPath;
-						_attachment.FileFormat = oldAttachment.FileFormat;
-					}
-
-					var updateResult = await attachmentRepository.Update(id, _attachment);
-
-					if (updateResult is OkObjectResult)
-					{
-						//upated successfully, remove the old attachment
-						try
-						{
-							await _fileUpload.DeleteFileAsync(oldAttachment.AttachmentPath);
-						}
-						catch { }
-					}
-					else
-					{
-						//something failed delete the uploaded file
-						try
-						{
-							await _fileUpload.DeleteFileAsync(_attachment.AttachmentPath);
-						}
-						catch { }
-					}
-
-					return updateResult;
+					var path = await _fileUpload.UploadFileAsync(attachment.Attachment, employee.EmployeeCode ?? "");
+					_attachment.AttachmentPath = path;
+					_attachment.FileFormat = attachment.Attachment.ContentType;
 				}
+				else
+				{
+					_attachment.AttachmentPath = oldAttachment.AttachmentPath;
+					_attachment.FileFormat = oldAttachment.FileFormat;
+				}
+
+				var updateResult = await attachmentRepository.Update(id, _attachment);
+
+				if (updateResult is OkObjectResult)
+				{
+					//upated successfully, remove the old attachment
+					try
+					{
+						await _fileUpload.DeleteFileAsync(oldAttachment.AttachmentPath);
+					}
+					catch { }
+				}
+				else
+				{
+					//something failed delete the uploaded file
+					try
+					{
+						await _fileUpload.DeleteFileAsync(_attachment.AttachmentPath);
+					}
+					catch { }
+				}
+
+				return updateResult;
 			}
 
 			return BadRequest();
@@ -166,7 +177,9 @@ namespace HRMS.Presentation.Controllers
 				return NotFound();
 			}
 
-			var path = attachment.AttachmentPath;
+			var fileUrl = attachment.AttachmentPath;
+
+			var path = _fileUpload.GetFilePhysicalPath(fileUrl);
 			if (!System.IO.File.Exists(path))
 			{
 				return NotFound();
@@ -178,6 +191,27 @@ namespace HRMS.Presentation.Controllers
 			var contentType = attachment.FileFormat ?? "application/octet-stream";
 
 			return File(fileBytes, contentType, fileName);
+		}
+
+		[HttpDelete("[action]/{AttachmentId}")]
+		public async Task<IActionResult> DeleteAttachment(int AttachmentId)
+		{
+			var attachment = await attachmentRepository.LinqGetByTableId(AttachmentId);
+			if (attachment == null)
+				return NotFound();
+
+			var deleteResult = await attachmentRepository.Remove(AttachmentId);
+
+			if (deleteResult is OkResult)
+			{
+				try
+				{
+					await _fileUpload.DeleteFileAsync(attachment.AttachmentPath);
+				}
+				catch { }
+			}
+
+			return deleteResult;
 		}
 	}
 }
