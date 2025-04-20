@@ -5,10 +5,10 @@ namespace HRMS.DAL.UDTs
 	[UserDefinedTable("PayrollTemplateLinesType")]
 	public class PayrollTemplateLineType
 	{
-		[UserDefinedColumn("PayEarningID")]
-		public int? PayEarningId { get; set; }
+		[UserDefinedColumn("PayInfID")]
+		public int? PayInfID { get; set; }
 
-		[UserDefinedColumn("PayDeductiID")]
-		public int? PayDeductId { get; set; }
+		[UserDefinedColumn("Amount")]
+		public float? Amount { get; set; }
 	}
 }

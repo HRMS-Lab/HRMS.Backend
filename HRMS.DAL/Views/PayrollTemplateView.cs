@@ -13,8 +13,8 @@
 
 		public int? PayTempLinesId { get; set; }
 		public int? PayTempHeaderId { get; set; }
-		public int? PayEarningId { get; set; }
-		public int? PayDeductId { get; set; }
+		public int? PayInfID { get; set; }
+		public double? Amount { get; set; }
 
 		public DateTime? LineDateCreated { get; set; }
 		public DateTime? LineDateUpdated { get; set; }

@@ -77,8 +77,8 @@ namespace HRMS.DAL.Data
 		public virtual DbSet<UserInterface> UserInterfaces { get; set; }
 
 		public virtual DbSet<RoleUserInterfaces> RoleUserInterfaces { get; set; }
-
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public virtual DbSet <PayrollInfluence> PayrollInfluences { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Addresses>(entity =>
 			{
@@ -883,22 +883,22 @@ namespace HRMS.DAL.Data
 
 				entity.Property(e => e.PayTempLinesId).HasColumnName("PayTempLinesID");
 				entity.Property(e => e.PayTempHeaderId).HasColumnName("PayTempHeaderID");
-				entity.Property(e => e.PayDeductId).HasColumnName("PayDeductID");
-				entity.Property(e => e.PayEarningId).HasColumnName("PayEarningID");
+				entity.Property(e => e.PayInfID).HasColumnName("PayInfID");
+				entity.Property(e => e.Amount).HasColumnName("Amount");
 				entity.Property(e => e.DateCreated)
 					.HasDefaultValueSql("(getdate())")
 					.HasColumnType("datetime");
 				entity.Property(e => e.DateUpdated).HasColumnType("datetime");
 
-				entity.HasOne(d => d.PayrollEarning).WithMany(p => p.PayrollTemplateLines)
-					.HasForeignKey(d => d.PayEarningId)
-					.OnDelete(DeleteBehavior.ClientSetNull)
-					.HasConstraintName("FK_PayTempLine_PayEarning");
+				//entity.HasOne(d => d.PayrollEarning).WithMany(p => p.PayrollTemplateLines)
+				//	.HasForeignKey(d => d.PayEarningId)
+				//	.OnDelete(DeleteBehavior.ClientSetNull)
+				//	.HasConstraintName("FK_PayTempLine_PayEarning");
 
-				entity.HasOne(d => d.PayrollDeduction).WithMany(p => p.PayrollTemplateLines)
-					.HasForeignKey(d => d.PayDeductId)
-					.OnDelete(DeleteBehavior.ClientSetNull)
-					.HasConstraintName("FK_PayTempLine_PayDeduct");
+				//entity.HasOne(d => d.PayrollDeduction).WithMany(p => p.PayrollTemplateLines)
+				//	.HasForeignKey(d => d.PayDeductId)
+				//	.OnDelete(DeleteBehavior.ClientSetNull)
+				//	.HasConstraintName("FK_PayTempLine_PayDeduct");
 
 				entity.HasOne(d => d.PayrollTemplateHeader).WithMany(p => p.PayrollTemplateLines)
 					.HasForeignKey(d => d.PayTempHeaderId)
@@ -970,7 +970,34 @@ namespace HRMS.DAL.Data
 
 			});
 
-			modelBuilder.Entity<RoleUserInterfaces>(entity =>
+            modelBuilder.Entity<PayrollInfluence>(entity =>
+            {
+                entity.HasKey(e => e.PayInfID).HasName("PK_PayrollDeductions");
+                entity.ToTable("PayrollInfluences");
+
+                entity.Property(e => e.PayInfID).HasColumnName("PayInfID");
+                entity.Property(e => e.OrgID).HasColumnName("OrgID");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+                entity.Property(e => e.Descrition)
+                    .HasMaxLength(100);
+                entity.Property(e => e.Type);
+                entity.Property(e => e.SysInfID);
+                entity.Property(e => e.Active)
+                    .IsRequired();
+                entity.Property(e => e.DateCreated)
+                    .HasDefaultValueSql("(getdate())")
+                    .HasColumnType("datetime");
+                entity.Property(e => e.DateUpdated)
+                    .HasColumnType("datetime");
+
+              
+            });
+
+
+
+            modelBuilder.Entity<RoleUserInterfaces>(entity =>
 			{
 				entity.ToTable("RolesUserInterfaces");
 				entity.HasKey(e => e.UIRoleId).HasName("PK__RoleUserInterfaces__8AFACE1A3A3E3G5A");

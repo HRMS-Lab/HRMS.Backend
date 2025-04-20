@@ -21,7 +21,7 @@ namespace HRMS.DAL.Data
 
 		partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<UserIdentityView>(entity =>
+			modelBuilder.Entity<UserIdentityViewl>(entity =>
 			{
 				entity.HasNoKey();
 				entity.ToView("UserIdentityView");
@@ -101,8 +101,8 @@ namespace HRMS.DAL.Data
 				entity.Property(e => e.HeaderDateUpdated).HasColumnName("HeaderDateUpdated");
 				entity.Property(e => e.PayTempLinesId).HasColumnName("PayTempLinesID");
 				entity.Property(e => e.PayTempHeaderId).HasColumnName("PayTempHeaderID");
-				entity.Property(e => e.PayEarningId).HasColumnName("PayEarningID");
-				entity.Property(e => e.PayDeductId).HasColumnName("PayDeductID");
+				entity.Property(e => e.PayInfID).HasColumnName("PayInfID");
+				entity.Property(e => e.Amount).HasColumnName("Amount");
 				entity.Property(e => e.LineDateCreated).HasColumnName("LineDateCreated");
 				entity.Property(e => e.LineDateUpdated).HasColumnName("LineDateUpdated");
 			});

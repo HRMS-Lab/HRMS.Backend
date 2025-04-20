@@ -6,8 +6,8 @@ namespace HRMS.DAL.Models
 	{
 		public int PayTempLinesId { get; set; }
 		public int PayTempHeaderId { get; set; }
-		public int? PayEarningId { get; set; }
-		public int? PayDeductId { get; set; }
+		public int? PayInfID { get; set; }
+		public float? Amount { get; set; }
 
 		public DateTime DateCreated { get; set; }
 		public DateTime? DateUpdated { get; set; }
@@ -16,10 +16,10 @@ namespace HRMS.DAL.Models
 		[JsonIgnore]
 		public virtual PayrollTemplateHeader PayrollTemplateHeader { get; set; }
 
-		[JsonIgnore]
-		public virtual PayrollEarning PayrollEarning { get; set; }
+		//[JsonIgnore]
+		//public virtual PayrollEarning PayrollEarning { get; set; }
 
-		[JsonIgnore]
-		public virtual PayrollDeduction PayrollDeduction { get; set; }
+		//[JsonIgnore]
+		//public virtual PayrollDeduction PayrollDeduction { get; set; }
 	}
 }
