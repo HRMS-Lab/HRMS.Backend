@@ -19,9 +19,8 @@ namespace HRMS.DAL.DTOs
         [StoredProcedureParameter]
         public int? Type { get; set; }
 
-        [StoredProcedureParameter]
         public int? SysInfID { get; set; }
-
+        [StoredProcedureParameter]
      
     }
 }

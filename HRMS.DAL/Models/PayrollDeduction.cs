@@ -14,6 +14,8 @@ namespace HRMS.DAL.Models
 		public string? DeductionDesc { get; set; }
 		[StoredProcedureParameter]
 		public string? Refrence { get; set; }
+        public int SysInfID { get; set; }
+        [StoredProcedureParameter]
 		public bool Active { get; set; }
 		public DateTime DateCreated { get; set; }
 		public DateTime? DateUpdated { get; set; }
