@@ -1,4 +1,5 @@
-﻿using HRMS.DAL.Models;
+﻿using HRMS.DAL.DTOs;
+using HRMS.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRMS.DAL.Data
@@ -78,6 +79,13 @@ namespace HRMS.DAL.Data
 
 		public virtual DbSet<RoleUserInterfaces> RoleUserInterfaces { get; set; }
         public virtual DbSet <PayrollInfluence> PayrollInfluences { get; set; }
+        public virtual DbSet <PayrollSystemInflunesView> PayrollSystemInflunesView { get; set; }
+        public virtual DbSet<PayrollContractWithDetailsDto> PayrollContractWithDetailsDtos { get; set; }
+        public virtual DbSet<PayrollCalculationHeaderDto> PayrollCalculationHeaderDtos { get; set; }
+        public virtual DbSet<PayrollCalculationHeaderInsertDto> PayrollCalculationHeaderInsertDtos { get; set; }
+        public virtual DbSet<PayrollCalculationHeaderInsertResultDto> PayrollCalculationHeaderInsertResultDtos { get; set; }
+        public virtual DbSet<PayrollCalculationSummaryDto> PayrollCalculationSummaryDtos { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Addresses>(entity =>
@@ -806,7 +814,8 @@ namespace HRMS.DAL.Data
 					.HasMaxLength(100);
 				entity.Property(e => e.Refrence).HasColumnName("Refrence")
 					.HasMaxLength(50);
-				entity.Property(e => e.Active).HasColumnName("Active")
+                entity.Property(e => e.SysInfID).HasColumnName("SysInfID").IsRequired();
+                entity.Property(e => e.Active).HasColumnName("Active")
 					.IsRequired();
 				entity.Property(e => e.DateCreated)
 					.HasDefaultValueSql("(getdate())")
@@ -996,8 +1005,101 @@ namespace HRMS.DAL.Data
             });
 
 
+            
+        
+            
 
-            modelBuilder.Entity<RoleUserInterfaces>(entity =>
+            // Define the mapping for PayrollContractWithDetailsDto
+            modelBuilder.Entity<PayrollContractWithDetailsDto>(entity =>
+            {
+                entity.HasNoKey();  // This entity does not have a primary key
+                entity.ToView(null);  // This is just for the query, not a table or view
+
+                entity.Property(e => e.PayContHeadID).HasColumnName("PayContHeadID");
+                entity.Property(e => e.EmployeeID).HasColumnName("EmployeeID");
+                entity.Property(e => e.EmployeeName).HasColumnName("EmployeeName");
+                entity.Property(e => e.PayTempHeadID).HasColumnName("PayTempHeadID");
+                entity.Property(e => e.StartDate).HasColumnName("StartDate");
+                entity.Property(e => e.EndDate).HasColumnName("EndDate");
+                entity.Property(e => e.Descrption).HasColumnName("Descrption");
+                entity.Property(e => e.Active).HasColumnName("Active");
+                entity.Property(e => e.DateCreated).HasColumnName("DateCreated");
+                entity.Property(e => e.DateUpdated).HasColumnName("DateUpdated");
+                entity.Property(e => e.ContractLinesjson).HasColumnName("ContractLinesjson");  // Mapping the XML column
+            });
+
+            modelBuilder.Entity<PayrollCalculationHeaderDto>(entity =>
+            {
+                entity.HasNoKey(); // No primary key since it's used for SP result only
+                entity.ToView(null); // Not mapped to a table or view
+
+                entity.Property(e => e.PayClacHeaderID).HasColumnName("PayClacHeaderID");
+                entity.Property(e => e.OrgID).HasColumnName("OrgID");
+                entity.Property(e => e.Description).HasColumnName("Description");
+                entity.Property(e => e.Month).HasColumnName("Month");
+                entity.Property(e => e.Year).HasColumnName("Year");
+                entity.Property(e => e.Posted).HasColumnName("Posted");
+                entity.Property(e => e.PayClacDateTime).HasColumnName("PayClacDateTime");
+            });
+
+            modelBuilder.Entity<PayrollCalculationHeaderInsertDto>(entity =>
+            {
+                entity.HasNoKey();       // This is NOT a table or view, no key
+                entity.ToView(null);     // No underlying table or view
+
+                entity.Property(e => e.OrgID).HasColumnName("OrgID");
+                entity.Property(e => e.Description).HasColumnName("Description");
+                entity.Property(e => e.Month).HasColumnName("Month");
+                entity.Property(e => e.Year).HasColumnName("Year");
+            });
+
+            modelBuilder.Entity<PayrollCalculationSummaryDto>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToView(null);
+
+                entity.Property(e => e.FullName).HasColumnName("FullName");
+                entity.Property(e => e.PayClacHeaderID).HasColumnName("PayClacHeaderID");
+                entity.Property(e => e.EmployeeID).HasColumnName("EmployeeID");
+                entity.Property(e => e.NetSalary).HasColumnName("NetSalary");
+                entity.Property(e => e.GrossSalary).HasColumnName("GrossSalary");
+                entity.Property(e => e.TotalEarning).HasColumnName("TotalEarning");
+                entity.Property(e => e.TotalDeduction).HasColumnName("TotalDeduction");
+            });
+
+
+            modelBuilder.Entity<PayrollCalculationHeaderInsertResultDto>(entity =>
+            {
+                entity.HasNoKey(); // This is a result from a stored procedure, not a real table
+                entity.ToView(null); // Prevents EF from expecting a backing table or view
+
+                entity.Property(e => e.NewPayClacHeaderID).HasColumnName("NewPayClacHeaderID");
+                entity.Property(e => e.NumberOfContractsAffected).HasColumnName("Number of contracts affected");
+            });
+
+
+
+            modelBuilder.Entity<PayrollSystemInflunesView>(entity =>
+			{
+				entity.HasNoKey(); // Because it's a view or stored procedure result, not a tracked table
+				entity.ToView(null); // Optional: prevents EF from trying to map it to a real DB view/table
+
+				entity.Property(e => e.SysInfID).HasColumnName("SysInfID");
+				entity.Property(e => e.Name)
+					.IsRequired()
+					.HasMaxLength(50);
+				entity.Property(e => e.Descrption)
+					.HasMaxLength(100);
+				entity.Property(e => e.Active)
+					.IsRequired();
+				entity.Property(e => e.DateCreated)
+					.HasColumnType("datetime");
+				entity.Property(e => e.DateUpdated)
+					.HasColumnType("datetime");
+			});
+
+
+			modelBuilder.Entity<RoleUserInterfaces>(entity =>
 			{
 				entity.ToTable("RolesUserInterfaces");
 				entity.HasKey(e => e.UIRoleId).HasName("PK__RoleUserInterfaces__8AFACE1A3A3E3G5A");

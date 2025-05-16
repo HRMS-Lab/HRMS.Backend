@@ -4,23 +4,24 @@ namespace HRMS.DAL.DTOs
 {
     public class PayrollInfluenceDto
     {
-        [StoredProcedureParameter]
+     
         public int PayInfID { get; set; }
 
-        [StoredProcedureParameter]
+      
         public int OrgID { get; set; }
 
-        [StoredProcedureParameter]
+      
         public string Name { get; set; }
 
-        [StoredProcedureParameter]
+        
         public string? Descrition { get; set; }
 
-        [StoredProcedureParameter]
+        
         public int? Type { get; set; }
 
         public int? SysInfID { get; set; }
-        [StoredProcedureParameter]
-     
+      
+
     }
+
 }

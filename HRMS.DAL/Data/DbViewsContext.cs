@@ -17,11 +17,11 @@ namespace HRMS.DAL.Data
 		public virtual DbSet<AttendanceCalenderView> AttendanceCalenderViews { get; set; }
 		public virtual DbSet<SecurityRoleView> SecurityRoleViews { get; set; }
 		public virtual DbSet<RoleUserInterfaceView> RoleUserInterfaceViews { get; set; }
-		public virtual DbSet<UserView> UserViews { get; set; }
+        public virtual DbSet<UserView> UserViews { get; set; }
 
 		partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<UserIdentityViewl>(entity =>
+			modelBuilder.Entity<UserIdentityView>(entity =>
 			{
 				entity.HasNoKey();
 				entity.ToView("UserIdentityView");

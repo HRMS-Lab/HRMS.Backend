@@ -7,5 +7,5 @@
 		public string? DeductionDesc { get; set; }
 		public string? Refrence { get; set; }
         public int? SysInfID { get; set; }
-	}
+    }
 }

@@ -13,7 +13,9 @@
 
 		public int? PayTempLinesId { get; set; }
 		public int? PayTempHeaderId { get; set; }
-		public int? PayInfID { get; set; }
+        public int? influncetypeID { get; set; }
+        public string? influncetype { get; set; }
+        public int? PayInfID { get; set; }
 		public double? Amount { get; set; }
 
 		public DateTime? LineDateCreated { get; set; }

@@ -8,6 +8,7 @@ using HRMS.Presentation.Handlers;
 using HRMS.Presentation.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HRMS.Presentation.Controllers
 {
@@ -64,5 +65,41 @@ namespace HRMS.Presentation.Controllers
 
             return await _payrollDeductionRepository.GetByTableId(req.Id);
         }
+        //private readonly DbContext _context;
+
+        //public PayrollDeductionController(DbContext context)
+        //{
+        //    _context = context;
+        }
+       // [HttpPost("[action]")]
+        //public async Task<IActionResult> CreatePayrollDeduction2([FromBody] PayrollDeductionDto payDeduct)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(ModelState);
+
+        //    try
+        //    {
+        //        var result = await _context.Database.ExecuteSqlRawAsync(
+        //            "EXEC Pay_InsertPayrollDeduction @OrgID = {0}, @DeductionName = {1}, @DeductionDesc = {2}, @Refrence = {3}, @SysInfID = {4}",
+        //            payDeduct.OrgId,
+        //            payDeduct.DeductionName,
+        //            payDeduct.DeductionDesc,
+        //            payDeduct.Refrence,
+        //            payDeduct.SysInfID
+        //        );
+
+        //        return Ok(new { success = true, message = "Deduction inserted successfully." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new
+        //        {
+        //            success = false,
+        //            message = "An error occurred while inserting the deduction.",
+        //            error = ex.Message
+        //        });
+        //    }
+        //}
+        ////End of code
     }
-}
+
