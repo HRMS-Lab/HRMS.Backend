@@ -14,8 +14,7 @@ namespace HRMS.DAL.Data
 			: base(options)
 		{
 		}
-
-		public virtual DbSet<Addresses> Addresses { get; set; }
+        public virtual DbSet<Addresses> Addresses { get; set; }
 
 		public virtual DbSet<AdminProjectMapping> AdminProjectMappings { get; set; }
 
@@ -88,7 +87,66 @@ namespace HRMS.DAL.Data
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Addresses>(entity =>
+            modelBuilder.Entity<HRMS.DAL.Views.EmployeeRegistryView>(entity =>
+            {
+                entity.HasNoKey(); // 🔥 مهم لأنه View
+
+                entity.ToView("vw_AllEmployessRegistiry"); // اسم الـ View
+
+                entity.Property(e => e.EmployeeID).HasColumnName("EmployeeID");
+
+                entity.Property(e => e.EmployeeCode)
+                    .HasMaxLength(50)
+                    .HasColumnName("EmployeeCode");
+
+                entity.Property(e => e.FullName)
+                    .HasMaxLength(150)
+                    .HasColumnName("FullName");
+
+                entity.Property(e => e.NationalID)
+                    .HasMaxLength(50)
+                    .HasColumnName("NationalID");
+
+                entity.Property(e => e.TitleName)
+                    .HasMaxLength(100)
+                    .HasColumnName("TitleName");
+
+                entity.Property(e => e.Phone)
+                    .HasMaxLength(50)
+                    .HasColumnName("Phone");
+
+                entity.Property(e => e.BranchName)
+                    .HasMaxLength(100)
+                    .HasColumnName("BranchName");
+
+                entity.Property(e => e.Recruiter)
+                    .HasMaxLength(100)
+                    .HasColumnName("recruiter");
+
+                entity.Property(e => e.InterviewDate)
+                    .HasColumnType("100")
+                    .HasColumnName("interviewDate");
+
+                entity.Property(e => e.HireDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("HireDate");
+
+                entity.Property(e => e.BirthDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("BirthDate");
+
+                entity.Property(e => e.Age)
+                    .HasColumnName("Age");
+
+                entity.Property(e => e.Gender)
+                    .HasMaxLength(10)
+                    .HasColumnName("Gender");
+
+                entity.Property(e => e.Active)
+                    .HasColumnName("Active");
+            });
+
+            modelBuilder.Entity<Addresses>(entity =>
 			{
 				entity.HasKey(e => e.AddressId).HasName("PK__Addresse__091C2A1BC8E86FEE");
 

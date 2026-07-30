@@ -6,7 +6,7 @@ namespace HRMS.DAL.Interfaces
 	public interface IReadOnlyRepository<T> where T : class
 	{
 		public Task<ActionResult<IEnumerable<T>>> Get();
-		public Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string spName, string tableName = "");
+		public Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex,int orgid, int pageSize, string spName, string tableName = "");
 		public Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string searchValue, string spName, string tableName = "");
 		public Task<ActionResult<IEnumerable<T>>> Search(string spName, string searchValue);
 		public Task<ActionResult<T>> GetByTableId(int id);

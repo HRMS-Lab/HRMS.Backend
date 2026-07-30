@@ -38,16 +38,18 @@ namespace HRMS.Presentation.Controllers
             return Ok(result);
         }
         [HttpPost("InsertPayrollCalculationHeader")]
-        public async Task<ActionResult<PayrollCalculationHeaderInsertResultDto>> InsertPayrollCalculationHeader(
+        public async Task<ActionResult<PayrollCalculationSummaryDto>> InsertPayrollCalculationHeader(
     [FromBody] PayrollCalculationHeaderInsertDto request)
         {
-            var results = await _context.Set<PayrollCalculationHeaderInsertResultDto>()
+            //var results = await _context.Set<PayrollCalculationHeaderInsertResultDto>()
+            var result = await _context
+                    .Set<PayrollCalculationSummaryDto>()
                 .FromSqlRaw(
                     "EXEC [dbo].[Pay_InsertPayrollClaculationHeader] @OrgID = {0}, @Description = {1}, @Month = {2}, @Year = {3}",
                     request.OrgID, request.Description, request.Month, request.Year)
                 .ToListAsync();
 
-            var result = results.FirstOrDefault();
+           // var result = results.FirstOrDefault();
 
             if (result == null)
                 return NotFound("No result returned from stored procedure.");

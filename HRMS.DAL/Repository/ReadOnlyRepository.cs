@@ -114,9 +114,9 @@ namespace HRMS.DAL.Repository
 			return Ok(data);
 		}
 
-		public async Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string spName, string tableName = "")
+		public async Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, int orgid,string spName, string tableName = "")
 		{
-			return await GetPaginated(pageIndex, pageSize, "", spName, tableName);
+			return await GetPaginated(pageIndex, pageSize, orgid, spName, tableName);
 		}
 
 		public async Task<ActionResult<PagedList<T>>> GetPaginated(int pageIndex, int pageSize, string SearchValue, string spName, string tableName = "")

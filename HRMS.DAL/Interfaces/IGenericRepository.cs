@@ -12,5 +12,6 @@ namespace HRMS.DAL.Interfaces
 		public Task<IActionResult> Delete(int id);
 		public Task<ActionResult> Remove(Dictionary<string, int>? whereConditions = null);
 		public Task<IActionResult> Remove(int id);
+
 	}
 }

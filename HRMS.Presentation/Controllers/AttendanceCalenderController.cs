@@ -53,5 +53,36 @@ namespace HRMS.Presentation.Controllers
 
             return BadRequest();
         }
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetAttendanceReport(AttendanceReportDto report)
+        {
+            if (!TryValidateModel(report))
+                return BadRequest();
+
+            var data = await _attenCalenderRepository.ExecuteProcedure(
+                "usp_AttendanceReport",
+                new Dictionary<string, object?>
+                {
+            { "AttendanceYear", report.AttendanceYear },
+            { "AttendanceMonth", report.AttendanceMonth },
+            { "FullName", string.IsNullOrWhiteSpace(report.FullName) ? null : report.FullName },
+            { "NationalID", string.IsNullOrWhiteSpace(report.NationalID) ? null : report.NationalID },
+            { "Phone", string.IsNullOrWhiteSpace(report.Phone) ? null : report.Phone },
+            { "TitleName", string.IsNullOrWhiteSpace(report.TitleName) ? null : report.TitleName }
+                },
+                false);
+
+            return Ok(data);
+        }
+        public class AttendanceReportDto
+        {
+            public int AttendanceYear { get; set; }
+            public int AttendanceMonth { get; set; }
+
+            public string? FullName { get; set; }
+            public string? NationalID { get; set; }
+            public string? Phone { get; set; }
+            public string? TitleName { get; set; }
+        }
     }
 }
